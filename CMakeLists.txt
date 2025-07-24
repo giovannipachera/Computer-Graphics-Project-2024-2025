@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Project C CXX)
+project(SIMULATOR C CXX)
 
 # Enable C and C++ languages
 enable_language(C)
@@ -33,15 +33,15 @@ if(APPLE)
     file(GLOB_RECURSE HEADERS include/*.h include/*.hpp)
 
     # Define the project executable
-    add_executable(Project ${SOURCES} ${HEADERS})
+    add_executable(SIMULATOR ${SOURCES} ${HEADERS})
 
     # Include directories
-    target_include_directories(Project PRIVATE ${GLM_INCLUDE_DIRS})
-    target_include_directories(Project PRIVATE ${CMAKE_SOURCE_DIR}/include)
-    target_include_directories(Project PUBLIC ${Vulkan_INCLUDE_DIR})
+    target_include_directories(SIMULATOR PRIVATE ${GLM_INCLUDE_DIRS})
+    target_include_directories(SIMULATOR PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_include_directories(SIMULATOR PUBLIC ${Vulkan_INCLUDE_DIR})
 
     # Link libraries
-    target_link_libraries(Project PRIVATE Vulkan::Vulkan glfw Threads::Threads)
+    target_link_libraries(SIMULATOR PRIVATE Vulkan::Vulkan glfw Threads::Threads)
 
     # Shader setup for macOS
     file(GLOB SPIRV_SOURCE_FILES "${CMAKE_SOURCE_DIR}/shaders/*.spv")

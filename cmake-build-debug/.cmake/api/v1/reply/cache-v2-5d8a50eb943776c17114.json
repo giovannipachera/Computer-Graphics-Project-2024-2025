@@ -831,7 +831,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "Project"
+			"value" : "Computer-Graphics-Project-2024-2025"
 		},
 		{
 			"name" : "CMAKE_RANLIB",
@@ -1128,6 +1128,42 @@
 			],
 			"type" : "BOOL",
 			"value" : "FALSE"
+		},
+		{
+			"name" : "Computer-Graphics-Project-2024-2025_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug"
+		},
+		{
+			"name" : "Computer-Graphics-Project-2024-2025_IS_TOP_LEVEL",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "ON"
+		},
+		{
+			"name" : "Computer-Graphics-Project-2024-2025_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025"
 		},
 		{
 			"name" : "E09_BINARY_DIR",

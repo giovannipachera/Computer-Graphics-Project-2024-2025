@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: Project
+# Project: Computer-Graphics-Project-2024-2025
 # Configurations: Release
 # =============================================================================
 
@@ -41,37 +41,37 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = /Users/giovannipachera/Desktop/Computer$ Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug/
 # =============================================================================
-# Object build statements for EXECUTABLE target Project
+# Object build statements for EXECUTABLE target Computer-Graphics-Project-2024-2025
 
 
 #############################################
-# Order-only phony target for Project
+# Order-only phony target for Computer-Graphics-Project-2024-2025
 
-build cmake_object_order_depends_target_Project: phony || Shaders
+build cmake_object_order_depends_target_Computer-Graphics-Project-2024-2025: phony || Shaders
 
-build CMakeFiles/Project.dir/src/main.cpp.o: CXX_COMPILER__Project_unscanned_Release /Users/giovannipachera/Desktop/Computer$ Graphics/Project/Computer-Graphics-Project-2024-2025/src/main.cpp || cmake_object_order_depends_target_Project
-  DEP_FILE = CMakeFiles/Project.dir/src/main.cpp.o.d
+build CMakeFiles/Computer-Graphics-Project-2024-2025.dir/src/main.cpp.o: CXX_COMPILER__Computer-Graphics-Project-2024-2025_unscanned_Release /Users/giovannipachera/Desktop/Computer$ Graphics/Project/Computer-Graphics-Project-2024-2025/src/main.cpp || cmake_object_order_depends_target_Computer-Graphics-Project-2024-2025
+  DEP_FILE = CMakeFiles/Computer-Graphics-Project-2024-2025.dir/src/main.cpp.o.d
   FLAGS = -O3 -DNDEBUG -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   INCLUDES = -I"/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/include" -isystem /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/include -isystem /usr/local/include
-  OBJECT_DIR = CMakeFiles/Project.dir
-  OBJECT_FILE_DIR = CMakeFiles/Project.dir/src
+  OBJECT_DIR = CMakeFiles/Computer-Graphics-Project-2024-2025.dir
+  OBJECT_FILE_DIR = CMakeFiles/Computer-Graphics-Project-2024-2025.dir/src
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target Project
+# Link build statements for EXECUTABLE target Computer-Graphics-Project-2024-2025
 
 
 #############################################
-# Link the executable Project
+# Link the executable Computer-Graphics-Project-2024-2025
 
-build Project: CXX_EXECUTABLE_LINKER__Project_Release CMakeFiles/Project.dir/src/main.cpp.o | /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/lib/libvulkan.dylib /usr/local/lib/libglfw.3.4.dylib || Shaders
+build Computer-Graphics-Project-2024-2025: CXX_EXECUTABLE_LINKER__Computer-Graphics-Project-2024-2025_Release CMakeFiles/Computer-Graphics-Project-2024-2025.dir/src/main.cpp.o | /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/lib/libvulkan.dylib /usr/local/lib/libglfw.3.4.dylib || Shaders
   FLAGS = -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk
   LINK_LIBRARIES = -Wl,-rpath,/Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/lib -Wl,-rpath,/usr/local/lib  /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/lib/libvulkan.dylib  /usr/local/lib/libglfw.3.4.dylib
-  OBJECT_DIR = CMakeFiles/Project.dir
+  OBJECT_DIR = CMakeFiles/Computer-Graphics-Project-2024-2025.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = Project
-  TARGET_PDB = Project.dbg
+  TARGET_FILE = Computer-Graphics-Project-2024-2025
+  TARGET_PDB = Computer-Graphics-Project-2024-2025.dbg
 
 
 #############################################
@@ -113,7 +113,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug
 
-build all: phony Project
+build all: phony Computer-Graphics-Project-2024-2025
 
 # =============================================================================
 # Built-in targets

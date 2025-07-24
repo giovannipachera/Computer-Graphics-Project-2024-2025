@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Project"
+			"path" : "Computer-Graphics-Project-2024-2025"
 		}
 	],
 	"backtrace" : 1,
@@ -104,7 +104,7 @@
 			"id" : "Shaders::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "Project::@6890427a1f51a3e7e1df",
+	"id" : "Computer-Graphics-Project-2024-2025::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -134,8 +134,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "Project",
-	"nameOnDisk" : "Project",
+	"name" : "Computer-Graphics-Project-2024-2025",
+	"nameOnDisk" : "Computer-Graphics-Project-2024-2025",
 	"paths" : 
 	{
 		"build" : ".",
