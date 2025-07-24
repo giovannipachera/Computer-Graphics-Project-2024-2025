@@ -1,0 +1,6 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/x64/ninja -G Ninja -S "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025" -B "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug"
+-- Vulkan found at /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/include
+-- Found SPIR-V files: 
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug
