@@ -52,7 +52,7 @@ glm::mat4 MakeViewProjectionLookInDirection(glm::vec3 Pos, float Yaw, float Pitc
 	Ry = glm::rotate(glm::mat4(1), Yaw, glm::vec3(0, 1, 0));
 	Rz = glm::rotate(glm::mat4(1), Roll, glm::vec3(0, 0, 1));
 
-	View = glm::inverse(Trasl * Ry * Rx * Rz);
+        View = glm::inverse(Trasl * Rz * Rx * Ry);
 
 	glm::mat4 M = Proj * View;
 
@@ -101,5 +101,5 @@ glm::mat4 MakeWorld(glm::vec3 Pos, float Yaw, float Pitch, float Roll) {
 	Ry = glm::rotate(glm::mat4(1), Yaw, glm::vec3(0, 1, 0));
 	Rz = glm::rotate(glm::mat4(1), Roll, glm::vec3(0, 0, 1));
 
-	return M = Trasl * Rx * Ry * Rz;
+        return M = Trasl * Rz * Rx * Ry;
 }
