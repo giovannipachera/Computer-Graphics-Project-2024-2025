@@ -6,7 +6,7 @@
 #include "modules/TextMaker.hpp"
 
 std::vector<SingleText> outText = {
-	{1, {"Hey babe", "Take a walk in the wild side!", "", ""}, 0, 0}
+	{1, {"Ciao", "Take a walk in the wild side!", "", ""}, 0, 0}
 };
 
 // The uniform buffer object used in this example
@@ -135,18 +135,28 @@ class SIMULATOR : public BaseProject {
 		txt.init(this, &outText);
 
 		// Init local variables
-		Pos = glm::vec3(SC.I[SC.InstanceIds["tb"]].Wm[3]);
-		InitialPos = Pos;
-		Yaw = 0;
+		{
+			int tbIndex = SC.InstanceIds["tb"];
+			glm::mat4 tbMatrix = SC.I[tbIndex].Wm;
+
+			// La traslazione è nella **quarta riga**, NON nella quarta colonna!
+			Pos = glm::vec3(tbMatrix[3][0], tbMatrix[3][1], tbMatrix[3][2]);
+			InitialPos = Pos;
+			Yaw = 0.0f;
+		}
 
 		deltaP = (glm::vec3 **)calloc(SC.InstanceCount, sizeof(glm::vec3 *));
 		deltaA = (float *)calloc(SC.InstanceCount, sizeof(float));
 		usePitch = (float *)calloc(SC.InstanceCount, sizeof(float));
-		for(int i=0; i < SC.InstanceCount; i++) {
-			deltaP[i] = new glm::vec3(SC.I[i].Wm[3]);
+		for(int i = 0; i < SC.InstanceCount; i++) {
+			glm::mat4 W = SC.I[i].Wm;
+			glm::vec3 translation(W[3][0], W[3][1], W[3][2]);  // RIGA 4 della matrice
+
+			deltaP[i] = new glm::vec3(translation);
 			deltaA[i] = 0.0f;
 			usePitch[i] = 0.0f;
 		}
+
 	}
 
 	// Here you create your pipelines and Descriptor Sets!
@@ -279,9 +289,9 @@ class SIMULATOR : public BaseProject {
 	    CamRoll -= ROT_SPEED * deltaT * r.z;
 	    CamDist -= MOVE_SPEED * deltaT * m.y;
 
-	    CamYaw = glm::clamp(CamYaw, 0.0f, 2 * M_PI);
-	    CamPitch = glm::clamp(CamPitch, 0.0f, M_PI_2 - 0.01f);
-	    CamRoll = glm::clamp(CamRoll, -M_PI, M_PI);
+	    CamYaw = glm::clamp(CamYaw, 0.0f, 2.0f * float(M_PI));
+	    CamPitch = glm::clamp(CamPitch, 0.0f, float(M_PI_2) - 0.01f);
+	    CamRoll = glm::clamp(CamRoll, float(-M_PI), float(M_PI));
 	    CamDist = glm::clamp(CamDist, 7.0f, 15.0f);
 
 	    glm::vec3 CamTarget = Pos + glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0,1,0)) * glm::vec4(CamTargetDelta,1));
