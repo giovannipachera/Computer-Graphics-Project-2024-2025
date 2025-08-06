@@ -33,7 +33,8 @@ if(APPLE)
     file(GLOB_RECURSE HEADERS include/*.h include/*.hpp)
 
     # Define the project executable
-    add_executable(SIMULATOR ${SOURCES} ${HEADERS})
+    add_executable(SIMULATOR ${SOURCES} ${HEADERS}
+            src/WVP.hpp)
 
     # Include directories
     target_include_directories(SIMULATOR PRIVATE ${GLM_INCLUDE_DIRS})
