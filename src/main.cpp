@@ -139,8 +139,8 @@ class SIMULATOR : public BaseProject {
 			int tbIndex = SC.InstanceIds["tb"];
 			glm::mat4 tbMatrix = SC.I[tbIndex].Wm;
 
-			// La traslazione è nella **quarta riga**, NON nella quarta colonna!
-			Pos = glm::vec3(tbMatrix[3][0], tbMatrix[3][1], tbMatrix[3][2]);
+                        // La traslazione è nella **quarta colonna**, NON nella quarta riga!
+                        Pos = glm::vec3(tbMatrix[0][3], tbMatrix[1][3], tbMatrix[2][3]);
 			InitialPos = Pos;
 			Yaw = 0.0f;
 		}
@@ -150,7 +150,7 @@ class SIMULATOR : public BaseProject {
 		usePitch = (float *)calloc(SC.InstanceCount, sizeof(float));
 		for(int i = 0; i < SC.InstanceCount; i++) {
 			glm::mat4 W = SC.I[i].Wm;
-			glm::vec3 translation(W[3][0], W[3][1], W[3][2]);  // RIGA 4 della matrice
+                        glm::vec3 translation(W[0][3], W[1][3], W[2][3]);  // COLONNA 4 della matrice
 
 			deltaP[i] = new glm::vec3(translation);
 			deltaA[i] = 0.0f;
