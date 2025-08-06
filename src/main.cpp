@@ -323,16 +323,25 @@ class SIMULATOR : public BaseProject {
 	        SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
 	    }
 
-	    // Ruote (rotazione verticale)
-	    for (const std::string& name : tractorWheels) {
-	        int i = SC.InstanceIds[name.c_str()];
-	        glm::vec3 dP = glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0,1,0)) * glm::vec4(*deltaP[i],1));
-	        ubo.mMat = MakeWorld(Pos + dP, Yaw + deltaA[i], usePitch[i] * wheelRoll, 0.0f) * baseTr;
-	        ubo.mvpMat = ViewPrj * ubo.mMat;
-	        ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
-	        SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
-	        SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
-	    }
+            // Ruote (rotazione verticale)
+            for (const std::string& name : tractorWheels) {
+                int i = SC.InstanceIds[name.c_str()];
+                glm::vec3 dP = glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0,1,0)) * glm::vec4(*deltaP[i],1));
+
+                // front wheels steer with the axle, back wheels keep the body yaw
+                bool isFront = (name == "flw" || name == "frw");
+                float yawSteer = isFront ? SteeringAng : 0.0f;
+
+                // right wheels are mirrored in the model and need opposite roll
+                bool isRight = (name == "frw" || name == "brw");
+                float pitchRoll = isRight ? -wheelRoll : wheelRoll;
+
+                ubo.mMat = MakeWorld(Pos + dP, Yaw + deltaA[i] + yawSteer, pitchRoll, 0.0f) * baseTr;
+                ubo.mvpMat = ViewPrj * ubo.mMat;
+                ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+                SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+                SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+            }
 
 	    // Scenario
 	    for (const std::string& name : tractorScene) {
