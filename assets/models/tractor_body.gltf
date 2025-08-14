@@ -15,28 +15,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Cylinder.024",
-			"rotation":[
-				0,
-				1,
-				0,
-				0
-			],
-			"scale":[
-				-0.14813457429409027,
-				-1.4885447025299072,
-				-0.14813457429409027
-			],
+			"name":"Cube.001",
 			"translation":[
-				-1.4159737825393677,
-				3.8687682151794434,
-				0
+				2.5426377760595642e-05,
+				-0.0010649561882019043,
+				0.003846406936645508
 			]
 		}
 	],
 	"meshes":[
 		{
-			"name":"Cylinder.033",
+			"name":"Cube.028",
 			"primitives":[
 				{
 					"attributes":{
@@ -53,67 +42,67 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":190018,
+			"count":110677,
 			"max":[
-				24.014039993286133,
-				1.5598739385604858,
-				23.739315032958984
+				2.151822566986084,
+				2.064185380935669,
+				4.47905158996582
 			],
 			"min":[
-				-4.959468841552734,
-				-1.4940093755722046,
-				-30.221477508544922
+				-2.1401562690734863,
+				-2.481656551361084,
+				-3.5144076347351074
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":190018,
+			"count":110677,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":190018,
+			"count":110677,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5125,
-			"count":625485,
+			"count":608484,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":2280216,
+			"byteLength":1328124,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2280216,
-			"byteOffset":2280216,
+			"byteLength":1328124,
+			"byteOffset":1328124,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1520144,
-			"byteOffset":4560432,
+			"byteLength":885416,
+			"byteOffset":2656248,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2501940,
-			"byteOffset":6080576,
+			"byteLength":2433936,
+			"byteOffset":3541664,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":8582516,
+			"byteLength":5975600,
 			"uri":"tractor_body.bin"
 		}
 	]
