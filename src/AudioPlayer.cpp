@@ -34,12 +34,15 @@ struct AudioPlayer::Impl {
             playing = false;
             return;
         }
-        std::string cmd = playerCmd + " \"" + path + "\"";
+      
+        std::string baseCmd = playerCmd + " \"" + path + "\"";
         if (playerCmd.find("ffplay") != std::string::npos)
-            cmd += " >/dev/null 2>&1"; // silence ffplay output
-        if (loop)
-            cmd = "while true; do " + cmd + "; done";
-        std::system(cmd.c_str());
+            baseCmd += " >/dev/null 2>&1"; // silence ffplay output
+
+        do {
+            std::system(baseCmd.c_str());
+        } while (loop && playing);
+      
         playing = false;
     }
 };
