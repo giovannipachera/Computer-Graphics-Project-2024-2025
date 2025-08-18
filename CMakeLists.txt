@@ -83,6 +83,7 @@ if(APPLE)
     # Copy resources (textures, models, etc.) to the build directory
     file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
     file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/audio DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
 elseif(WIN32)
     # Windows specific configurations
@@ -196,6 +197,7 @@ elseif(UNIX AND NOT APPLE)
     file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
     file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/audio DESTINATION ${CMAKE_BINARY_DIR}/assets)
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
