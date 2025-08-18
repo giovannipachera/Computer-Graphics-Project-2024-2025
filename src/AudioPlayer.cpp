@@ -1,47 +1,81 @@
 #include "AudioPlayer.hpp"
-#include <iostream>
+#include <atomic>
+#include <cstdlib>
 #include <string>
+#include <thread>
 
 struct AudioPlayer::Impl {
-    std::string path; // stored path for reference
+    std::string path;
     bool loop = false;
-    bool playing = false;
+    std::atomic<bool> playing{false};
+    std::thread worker;
+    std::string playerCmd;
+
+    bool findPlayer() {
+        const std::string candidates[] = {
+            "ffplay -nodisp -autoexit", // ffmpeg
+            "aplay",                    // ALSA
+            "afplay",                   // macOS
+            "open"                      // fallback (macOS)
+        };
+        for (const auto& base : candidates) {
+            std::string program = base.substr(0, base.find(' '));
+            std::string cmd = "which " + program + " > /dev/null 2>&1";
+            if (std::system(cmd.c_str()) == 0) {
+                playerCmd = base;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void run() {
+        if (playerCmd.empty() && !findPlayer()) {
+            playing = false;
+            return;
+        }
+        std::string cmd = playerCmd + " \"" + path + "\"";
+        if (playerCmd.find("ffplay") != std::string::npos)
+            cmd += " >/dev/null 2>&1"; // silence ffplay output
+        if (loop)
+            cmd = "while true; do " + cmd + "; done";
+        std::system(cmd.c_str());
+        playing = false;
+    }
 };
 
 AudioPlayer::AudioPlayer() : impl(new Impl) {}
 
 AudioPlayer::~AudioPlayer() {
+    stop();
     delete impl;
 }
 
 bool AudioPlayer::load(const std::string& path, bool loop) {
     impl->path = path;
     impl->loop = loop;
-    return true; // Stub always succeeds
+    return true;
 }
 
 bool AudioPlayer::play() {
-    if (impl->path.empty()) {
-        return false;
-    }
+    if (impl->path.empty() || impl->playing) return false;
     impl->playing = true;
-    // This stub just logs the action; actual audio playback requires external libs.
-    std::cout << "[AudioPlayer] Playing " << impl->path
-              << (impl->loop ? " in loop" : "") << std::endl;
+    impl->worker = std::thread([this]{ impl->run(); });
     return true;
 }
 
 void AudioPlayer::stop() {
     if (!impl->playing) return;
     impl->playing = false;
-    std::cout << "[AudioPlayer] Stopped " << impl->path << std::endl;
+    if (!impl->playerCmd.empty()) {
+        std::string prog = impl->playerCmd.substr(0, impl->playerCmd.find(' '));
+        std::string cmd = "pkill -f \"" + prog + "\" > /dev/null 2>&1";
+        std::system(cmd.c_str());
+    }
+    if (impl->worker.joinable()) impl->worker.join();
 }
 
-void AudioPlayer::setLoop(bool loop) {
-    impl->loop = loop;
-}
+void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }
 
-bool AudioPlayer::isPlaying() const {
-    return impl->playing;
-}
+bool AudioPlayer::isPlaying() const { return impl->playing; }
 

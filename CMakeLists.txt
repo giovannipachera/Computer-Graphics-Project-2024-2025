@@ -154,10 +154,11 @@ elseif(UNIX AND NOT APPLE)
 
 
     find_package(glm REQUIRED)
+    find_package(Threads REQUIRED)
     target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_INCLUDE_DIRS})
 
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
+    target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw Threads::Threads)
 
     foreach(dir IN LISTS Vulkan_INCLUDE_DIR INCLUDE_DIRS)
         target_include_directories(${PROJECT_NAME} PUBLIC ${dir})
