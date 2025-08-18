@@ -9,16 +9,20 @@
 		{"id":"prm", "model":"assets/models/City_6_Industrial.gltf", "format":"GLTF"}
 	],
 	"textures": [
-		{"id":"t0","texture":"assets/textures/tractor_body_texture.png"},
+		{"id":"t0","texture":"assets/textures/body_classic_texture.png"},
+		{"id":"t10","texture":"assets/textures/body_barbie_texture.png"},
 		{"id":"t1","texture":"assets/textures/axle_texture.png"},
 		{"id":"t2","texture":"assets/textures/front_wheel_texture.png"},
 		{"id":"t3","texture":"assets/textures/back_wheel_texture.png"},
-		{"id":"t4","texture":"assets/textures/fender.png"},
+		{"id":"t4","texture":"assets/textures/fender_texture.png"},
 		{"id":"t5","texture":"assets/textures/Porto.png"},
 		{"id":"t6","texture":"assets/textures/textures.png"}
 	],
 	"instances": [
-		{ "id":"tb",  "model":"tb",  "texture":"t0",
+		{ "id":"tbc",  "model":"tb",  "texture":"t0",
+			"transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
+
+		{ "id":"tbb",  "model":"tb",  "texture":"t10",
 			"transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
 
 		{ "id":"ax",  "model":"ax",  "texture":"t1",

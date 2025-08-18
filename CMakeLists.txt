@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 
-
 # Platform-specific settings
 if(APPLE)
     # macOS specific configurations
@@ -34,7 +33,8 @@ if(APPLE)
 
     # Define the project executable
     add_executable(SIMULATOR ${SOURCES} ${HEADERS}
-            src/WVP.hpp)
+            src/WVP.hpp
+            src/AudioPlayer_miniaudio.cpp)
 
     # Include directories
     target_include_directories(SIMULATOR PRIVATE ${GLM_INCLUDE_DIRS})
@@ -49,7 +49,6 @@ if(APPLE)
 
     # Debug: print the found SPIR-V files
     message(STATUS "Found SPIR-V files: ${SPIRV_SOURCE_FILES}")
-
 
     # === Shader Compilation ===
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
@@ -80,9 +79,10 @@ if(APPLE)
         file(COPY ${SPV_FILE} DESTINATION ${CMAKE_BINARY_DIR}/shaders)
     endforeach()
 
-    # Copy resources (textures, models, etc.) to the build directory
+    # Copy resources (textures, models, audio, etc.) to the build directory
     file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/models   DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/audio    DESTINATION ${CMAKE_BINARY_DIR}/assets)
 
 elseif(WIN32)
     # Windows specific configurations
@@ -91,7 +91,6 @@ elseif(WIN32)
     set(GLFW "C:/VulkanSDK/libs/glfw-3.4.bin.WIN64")
     set(GLM "C:/VulkanSDK/libs/glm")
     set(GLSLANG_VALIDATOR "C:/VulkanSDK/1.4.304.0/Bin/glslangValidator.exe")
-
 
     # List of directories to add to the include path
     list(APPEND INCLUDE_DIRS "${GLFW}/include" ${GLM} headers)
@@ -139,9 +138,11 @@ elseif(WIN32)
     add_dependencies(${PROJECT_NAME} Shaders)
 
     file(GLOB SHADER_SPV_FILES "${CMAKE_SOURCE_DIR}/shaders/*.spv")
-    file(COPY ${SHADER_SPV_FILES} DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${SHADER_SPV_FILES}                  DESTINATION ${CMAKE_BINARY_DIR}/shaders)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/textures  DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/models    DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/audio     DESTINATION ${CMAKE_BINARY_DIR}/assets)
+
 elseif(UNIX AND NOT APPLE)
     file(GLOB_RECURSE SOURCES src/*.cpp)
     file(GLOB_RECURSE HEADERS include/*.h include/*.hpp)
@@ -150,8 +151,6 @@ elseif(UNIX AND NOT APPLE)
 
     find_package(Vulkan REQUIRED)
     find_package(glfw3 REQUIRED)
-
-
     find_package(glm REQUIRED)
     target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_INCLUDE_DIRS})
 
@@ -192,11 +191,39 @@ elseif(UNIX AND NOT APPLE)
     add_dependencies(${PROJECT_NAME} Shaders)
 
     file(GLOB SHADER_SPV_FILES "${CMAKE_SOURCE_DIR}/shaders/*.spv")
-    file(COPY ${SHADER_SPV_FILES} DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets/textures DESTINATION ${CMAKE_BINARY_DIR}/assets)
-
-    file(COPY ${CMAKE_SOURCE_DIR}/assets/models DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${SHADER_SPV_FILES}                  DESTINATION ${CMAKE_BINARY_DIR}/shaders)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/textures  DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/models    DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/audio     DESTINATION ${CMAKE_BINARY_DIR}/assets)
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# Include paths per AudioPlayer e miniaudio
+target_include_directories(SIMULATOR PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/external
+)
+
+# Sorgente dell'audio (miniaudio) - già incluso nell'add_executable sopra
+# (evitiamo duplicati)
+# target_sources(SIMULATOR PRIVATE src/AudioPlayer_miniaudio.cpp)
+
+# Definizione di una macro C++ con il path assoluto degli asset
+target_compile_definitions(SIMULATOR PRIVATE
+        PROJECT_ASSETS_DIR="${CMAKE_SOURCE_DIR}/assets"
+)
+
+# Copia 'assets' accanto all'eseguibile a ogni build (così i path relativi funzionano)
+add_custom_command(TARGET SIMULATOR POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:SIMULATOR>/assets"
+        COMMENT "Copying assets/ next to the simulator executable."
+)
+
+# Linux potrebbe richiedere pthread/dl
+if(UNIX AND NOT APPLE)
+    find_package(Threads REQUIRED)
+    target_link_libraries(SIMULATOR PRIVATE Threads::Threads dl)
+endif()

@@ -2,6 +2,43 @@
 #define JSON_DIAGNOSTICS 1
 #include "modules/Starter.hpp"
 #include "modules/TextMaker.hpp"
+#include "AudioPlayer.hpp"
+
+#include <filesystem>
+#include <iostream>
+#include <unordered_set>
+
+#if defined(__APPLE__)
+  #include <mach-o/dyld.h>
+#elif defined(_WIN32)
+  #include <windows.h>
+#endif
+
+// ===== Utility: directory dell'eseguibile =====
+static std::filesystem::path getExecutableDir() {
+#if defined(__APPLE__)
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+    std::string buf(size, '\0');
+    if (_NSGetExecutablePath(buf.data(), &size) == 0) {
+        std::error_code ec;
+        auto p = std::filesystem::weakly_canonical(std::filesystem::path(buf), ec);
+        return p.parent_path();
+    }
+    return std::filesystem::current_path();
+#elif defined(__linux__)
+    std::error_code ec;
+    auto p = std::filesystem::read_symlink("/proc/self/exe", ec);
+    if (!ec) return p.parent_path();
+    return std::filesystem::current_path();
+#elif defined(_WIN32)
+    char buf[MAX_PATH]{0};
+    GetModuleFileNameA(nullptr, buf, MAX_PATH);
+    return std::filesystem::path(buf).parent_path();
+#else
+    return std::filesystem::current_path();
+#endif
+}
 
 std::vector<SingleText> outText = {
     {1, {"Ciao", "Take a walk in the wild side!", "", ""}, 0, 0}
@@ -28,7 +65,6 @@ struct Vertex {
 
 #include "modules/Scene.hpp"
 #include "WVP.hpp"
-#include <unordered_set>
 
 class SIMULATOR : public BaseProject {
 protected:
@@ -49,7 +85,20 @@ protected:
     float Yaw;
     glm::vec3 InitialPos;
 
-    std::vector<std::string> tractorBody    = {"tb"};
+    std::vector<std::string> tractorBodies = {"tbc", "tbb"};
+    int currentBody = 0;
+
+    AudioPlayer music;
+
+    // Percorso ASSOLUTO agli assets (iniettato da CMake)
+    const std::filesystem::path ASSETS_ROOT = std::filesystem::path(PROJECT_ASSETS_DIR);
+
+    // Nomi file (non percorsi!) delle canzoni associate ai body
+    std::vector<std::string> bodyMusic = {
+        "classic.mp3",
+        "barbie.mp3"
+    };
+
     std::vector<std::string> tractorAxes    = {"ax"};
     std::vector<std::string> tractorWheels  = {"flw","frw","blw","brw"};
     std::vector<std::string> tractorFenders = {"lf", "rf"};
@@ -74,6 +123,49 @@ protected:
         Ar = (float)w/(float)h;
     }
 
+    // Helper: stampa contenuto directory (per debug)
+    static void printDir(const std::filesystem::path& p, const char* tag){
+        std::error_code ec;
+        if (!std::filesystem::exists(p, ec)) {
+            std::cerr << "[DBG] Dir '" << tag << "' NOT FOUND: " << p << "\n";
+            return;
+        }
+        std::cerr << "[DBG] Listing '" << tag << "': " << p << "\n";
+        for (auto& e : std::filesystem::directory_iterator(p, ec)) {
+            std::cerr << "  - " << e.path().filename().string() << "\n";
+        }
+    }
+
+    // Ritorna un path valido alla canzone cercando in 3 posti:
+    // 1) accanto all'eseguibile: <exeDir>/assets/audio/<fileName>
+    // 2) dalla CWD:              assets/audio/<fileName>
+    // 3) dal path assoluto CMake: PROJECT_ASSETS_DIR/audio/<fileName>
+    std::optional<std::filesystem::path> resolveMusicPath(const std::string& fileName) {
+        const auto exeDir = getExecutableDir();
+        std::vector<std::filesystem::path> cands = {
+            exeDir / "assets" / "audio" / fileName,
+            std::filesystem::path("assets") / "audio" / fileName,
+            ASSETS_ROOT / "audio" / fileName
+        };
+        std::cerr << "[AUDIO][DBG] exeDir=" << exeDir << "\n";
+        std::cerr << "[AUDIO][DBG] CWD="    << std::filesystem::current_path() << "\n";
+        for (auto& c : cands) {
+            std::cerr << "[AUDIO][DBG] cand=" << c << " exists=" << (std::filesystem::exists(c) ? "YES":"NO") << "\n";
+            if (std::filesystem::exists(c)) return c;
+        }
+        return std::nullopt;
+    }
+
+    bool loadAndPlay(const std::filesystem::path& p, bool loop=true) {
+        const std::string s = p.string();
+        bool okLoad = music.load(s, loop);
+        std::cerr << "[AUDIO] load('" << s << "') -> " << (okLoad ? "OK" : "FAIL") << "\n";
+        if (!okLoad) return false;
+        bool okPlay = music.play();
+        std::cerr << "[AUDIO] play() -> " << (okPlay ? "OK" : "FAIL") << "\n";
+        return okPlay;
+    }
+
     void localInit() {
         DSL.init(this, {
             {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         VK_SHADER_STAGE_ALL_GRAPHICS},
@@ -94,6 +186,25 @@ protected:
         SC.init(this, &VD, DSL, P, "assets/models/scene.json");
         txt.init(this, &outText);
 
+        // ==== DEBUG directory utili
+        printDir(getExecutableDir(), "exeDir");
+        printDir(std::filesystem::current_path(), "CWD");
+        printDir(ASSETS_ROOT, "ASSETS_ROOT");
+        printDir(ASSETS_ROOT / "audio", "ASSETS_ROOT/audio");
+        printDir(getExecutableDir() / "assets" / "audio", "exeDir/assets/audio");
+        printDir("assets", "CWD/assets");
+        printDir("assets/audio", "CWD/assets/audio");
+
+        // --- AUDIO: risoluzione robusta del path e avvio in loop
+        const std::string fileName = bodyMusic[currentBody];
+        auto p = resolveMusicPath(fileName);
+        if (p) {
+            (void)loadAndPlay(*p, /*loop=*/true);
+        } else {
+            std::cerr << "[AUDIO][ERR] File audio non trovato in nessuno dei percorsi candidati: "
+                         << fileName << "\n";
+        }
+
         // Indici utili
         tbIndex = SC.InstanceIds["tb"];
         tractorPartIdx.insert(tbIndex);
@@ -105,12 +216,12 @@ protected:
         tractorPartIdx.insert(SC.InstanceIds["lf"]);
         tractorPartIdx.insert(SC.InstanceIds["rf"]);
 
-        // Pos del corpo: gestita da codice (non dal JSON)
+        // Pos del corpo
         Pos = glm::vec3(0.0f, 3.25f, 0.0f);
         InitialPos = Pos;
         Yaw = 0.0f;
 
-        // Offset letti dal JSON (RELATIVI al corpo)
+        // Offset letti dal JSON (relativi al corpo)
         deltaP   = (glm::vec3**)calloc(SC.InstanceCount, sizeof(glm::vec3*));
         deltaA   = (float*)calloc(SC.InstanceCount, sizeof(float));
         usePitch = (float*)calloc(SC.InstanceCount, sizeof(float));
@@ -153,6 +264,34 @@ protected:
 
     void updateUniformBuffer(uint32_t currentImage) {
         float deltaT; glm::vec3 m(0), r(0); bool fire=false; getSixAxis(deltaT,m,r,fire);
+
+        // --- input O/P per switch body/colore (e quindi brano)
+        static int prevP = GLFW_RELEASE, prevO = GLFW_RELEASE;
+        int curP = glfwGetKey(window, GLFW_KEY_P);
+        int curO = glfwGetKey(window, GLFW_KEY_O);
+
+        bool bodyChanged = false;
+        if (curP == GLFW_PRESS && prevP == GLFW_RELEASE) {
+            currentBody = (currentBody + 1) % (int)tractorBodies.size();
+            bodyChanged = true;
+        }
+        if (curO == GLFW_PRESS && prevO == GLFW_RELEASE) {
+            currentBody = (currentBody - 1 + (int)tractorBodies.size()) % (int)tractorBodies.size();
+            bodyChanged = true;
+        }
+        prevP = curP; prevO = curO;
+
+        if (bodyChanged) {
+            music.stop();
+            const std::string fn = bodyMusic[currentBody];
+            auto p = resolveMusicPath(fn);
+            if (p) {
+                bool ok = loadAndPlay(*p, /*loop=*/true);
+                std::cerr << "[AUDIO][SWITCH] " << (ok ? "OK" : "FAIL") << " (" << p->string() << ")\n";
+            } else {
+                std::cerr << "[AUDIO][SWITCH][ERR] File non trovato: " << fn << "\n";
+            }
+        }
 
         static float CamPitch = glm::radians(20.0f);
         static float CamYaw   = M_PI;
@@ -230,18 +369,32 @@ protected:
         gubo.eyePos     = dampedCamPos;
         gubo.eyeDir     = glm::vec4(0,0,0,1);
 
-        // Corpo
-        for (const std::string& name : tractorBody) {
-            int i = SC.InstanceIds[name];
-            glm::mat4 baseTr = baseFor(name);
-            ubo.mMat  = MakeWorld(Pos, Yaw, 0.0f, 0.0f) * baseTr;
-            ubo.mvpMat= ViewPrj * ubo.mMat;
-            ubo.nMat  = glm::inverse(glm::transpose(ubo.mMat));
-            SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
-            SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+        // --- Corpo: mostra SOLO l'istanza selezionata; le altre sottoterra
+        {
+            auto HideMat = [](const glm::mat4& baseTr) {
+                return glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10000.0f, 0.0f)) * baseTr;
+            };
+
+            for (int k = 0; k < (int)tractorBodies.size(); ++k) {
+                const std::string& name = tractorBodies[k];
+                int i = SC.InstanceIds[name];
+
+                glm::mat4 baseTr = baseFor(name);
+                if (k == currentBody) {
+                    ubo.mMat   = MakeWorld(Pos, Yaw, 0.0f, 0.0f) * baseTr;
+                } else {
+                    ubo.mMat   = HideMat(baseTr);
+                }
+
+                ubo.mvpMat = ViewPrj * ubo.mMat;
+                ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+                SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+                SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+            }
         }
 
-        // Assi: solo movimento globale + offset locale. NIENTE SteeringAng.
+        // Assi
         for (const std::string& name : tractorAxes) {
             int i = SC.InstanceIds[name];
             glm::mat4 bodyTr  = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
@@ -254,13 +407,13 @@ protected:
             SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
         }
 
-        // --- Allineamento tasselli: fase iniziale di ciascuna ruota (tweak) ---
-        static float PhaseFrontRight = 0.0f;                 // riferimento
-        static float PhaseFrontLeft  = glm::radians(20.0f);  // regola 10–25°
-        static float PhaseRearRight  = 0.0f;                 // riferimento
-        static float PhaseRearLeft   = glm::radians(20.0f);  // regola 10–25°
+        // Fasi rilievi ruote
+        static float PhaseFrontRight = 0.0f;
+        static float PhaseFrontLeft  = glm::radians(20.0f);
+        static float PhaseRearRight  = 0.0f;
+        static float PhaseRearLeft   = glm::radians(20.0f);
 
-        // Ruote: anteriori sterzano, tutte rotolano; sinistre specchiate; fase per allineare i rilievi
+        // Ruote
         for (const std::string& name : tractorWheels) {
             int i = SC.InstanceIds[name];
 
@@ -272,7 +425,6 @@ protected:
                 ? glm::rotate(glm::mat4(1.0f), SteeringAng, glm::vec3(0,1,0))
                 : glm::mat4(1.0f);
 
-            // fase per sincronizzare i rilievi
             float phase = 0.0f;
             if      (name == "frw") phase = PhaseFrontRight;
             else if (name == "flw") phase = PhaseFrontLeft;
@@ -280,8 +432,6 @@ protected:
             else if (name == "blw") phase = PhaseRearLeft;
 
             glm::mat4 rollTr = glm::rotate(glm::mat4(1.0f), wheelRoll + phase, glm::vec3(1,0,0));
-
-            // specchio per ruote sinistre (stai usando gli asset destri)
             glm::mat4 mirrorTr = (name == "flw" || name == "blw")
                 ? glm::scale(glm::mat4(1.0f), glm::vec3(-1.0f, 1.0f, 1.0f))
                 : glm::mat4(1.0f);
@@ -296,17 +446,15 @@ protected:
             SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
         }
 
-        // Parafanghi: sterzano attorno al centro RUOTA (nessun roll)
+        // Parafanghi
         for (const std::string& name : tractorFenders) {
             int iF = SC.InstanceIds[name];
-
-            // ruota abbinata: lf → flw, rf → frw
             const std::string wheelName = (name == "lf") ? "flw" : "frw";
             int iW = SC.InstanceIds[wheelName];
 
             glm::mat4 bodyTr   = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
-            glm::vec3 wheelP   = *deltaP[iW];              // pivot = posizione ruota dal JSON
-            glm::vec3 fendOff  = *deltaP[iF] - wheelP;     // offset parafango rispetto alla ruota
+            glm::vec3 wheelP   = *deltaP[iW];              // pivot = posizione ruota
+            glm::vec3 fendOff  = *deltaP[iF] - wheelP;     // offset parafango rispetto ruota
 
             glm::mat4 toWheel   = glm::translate(glm::mat4(1.0f), wheelP);
             glm::mat4 steerTr   = glm::rotate(glm::mat4(1.0f), SteeringAng, glm::vec3(0,1,0));
@@ -322,7 +470,7 @@ protected:
             SC.DS[iF]->map(currentImage, &gubo, sizeof(gubo), 2);
         }
 
-        // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
+        // Scenario
         for (const std::string& name : tractorScene) {
             int i = SC.InstanceIds[name];
             glm::mat4 baseTr = baseFor(name);
