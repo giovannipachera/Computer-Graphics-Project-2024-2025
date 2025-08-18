@@ -34,6 +34,7 @@ struct AudioPlayer::Impl {
             playing = false;
             return;
         }
+      
         std::string baseCmd = playerCmd + " \"" + path + "\"";
         if (playerCmd.find("ffplay") != std::string::npos)
             baseCmd += " >/dev/null 2>&1"; // silence ffplay output
@@ -41,7 +42,7 @@ struct AudioPlayer::Impl {
         do {
             std::system(baseCmd.c_str());
         } while (loop && playing);
-
+      
         playing = false;
     }
 };
