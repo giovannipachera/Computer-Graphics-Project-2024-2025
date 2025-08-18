@@ -2,6 +2,7 @@
 #define JSON_DIAGNOSTICS 1
 #include "modules/Starter.hpp"
 #include "modules/TextMaker.hpp"
+#include "AudioPlayer.hpp"
 
 std::vector<SingleText> outText = {
     {1, {"Ciao", "Take a walk in the wild side!", "", ""}, 0, 0}
@@ -51,6 +52,10 @@ protected:
 
     std::vector<std::string> tractorBodies = {"tbc", "tbb"};
     int currentBody = 0;
+    int lastBody = -1;
+
+    AudioPlayer classicAudio;
+    AudioPlayer barbieAudio;
 
     std::vector<std::string> tractorAxes    = {"ax"};
     std::vector<std::string> tractorWheels  = {"flw","frw","blw","brw"};
@@ -96,6 +101,11 @@ protected:
         SC.init(this, &VD, DSL, P, "assets/models/scene.json");
         txt.init(this, &outText);
 
+        classicAudio.load("assets/audio/classic.mp3", true);
+        barbieAudio.load("assets/audio/barbie.mp3", true);
+        classicAudio.play();
+        lastBody = currentBody;
+
         // Indici utili
         tbIndex = SC.InstanceIds["tb"];
         tractorPartIdx.insert(tbIndex);
@@ -137,6 +147,8 @@ protected:
     void localCleanup() {
         for (int i=0;i<SC.InstanceCount;++i) delete deltaP[i];
         free(deltaP); free(deltaA); free(usePitch);
+        classicAudio.stop();
+        barbieAudio.stop();
         DSL.cleanup(); P.destroy(); SC.localCleanup(); txt.localCleanup();
     }
     void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
@@ -170,6 +182,16 @@ protected:
 
         prevP = curP;
         prevO = curO;
+
+        if (currentBody != lastBody) {
+            if (lastBody == 0) classicAudio.stop();
+            else if (lastBody == 1) barbieAudio.stop();
+
+            if (currentBody == 0) classicAudio.play();
+            else if (currentBody == 1) barbieAudio.play();
+
+            lastBody = currentBody;
+        }
 
         static float CamPitch = glm::radians(20.0f);
         static float CamYaw   = M_PI;
