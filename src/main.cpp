@@ -5,7 +5,8 @@
 #include "AudioPlayer.hpp"
 
 std::vector<SingleText> outText = {
-    {1, {"Ciao", "Take a walk in the wild side!", "", ""}, 0, 0}
+    {1, {"Classic - Nashville Skyline Rag", "", "", ""}, 0, 0},
+    {2, {"Barbie", "Nashville Skyline Rag (Bob Dylan)", "", ""}, 0, 0}
 };
 
 struct UniformBufferObject {
@@ -70,7 +71,7 @@ protected:
         windowHeight = 600;
         windowTitle = "Hey buddy, are you a real country boy?";
         windowResizable = GLFW_TRUE;
-        initialBackgroundColor = {0.0f, 0.85f, 1.0f, 1.0f};
+        initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f};
         uniformBlocksInPool = 19*2 + 2;
         texturesInPool      = 19 + 1;
         setsInPool          = 19 + 1;
@@ -101,8 +102,8 @@ protected:
         SC.init(this, &VD, DSL, P, "assets/models/scene.json");
         txt.init(this, &outText);
 
-        classicAudio.load("assets/audio/classic.mp3", true);
-        barbieAudio.load("assets/audio/barbie.mp3", true);
+        classicAudio.load("assets/audio/classic.wav", true);
+        barbieAudio.load("assets/audio/barbie.wav", true);
         classicAudio.play();
         lastBody = currentBody;
 
@@ -184,8 +185,8 @@ protected:
         prevO = curO;
 
         if (currentBody != lastBody) {
-            if (lastBody == 0) classicAudio.stop(true);
-            else if (lastBody == 1) barbieAudio.stop(true);
+            if (lastBody == 0) classicAudio.stop(false);
+            else if (lastBody == 1) barbieAudio.stop(false);
 
             if (currentBody == 0) classicAudio.play();
             else if (currentBody == 1) barbieAudio.play();
