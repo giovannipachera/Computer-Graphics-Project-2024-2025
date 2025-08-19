@@ -47,12 +47,9 @@ struct AudioPlayer::Impl {
     }
 };
 
-AudioPlayer::AudioPlayer() : impl(new Impl) {}
+AudioPlayer::AudioPlayer() : impl(std::make_shared<Impl>()) {}
 
-AudioPlayer::~AudioPlayer() {
-    stop();
-    delete impl;
-}
+AudioPlayer::~AudioPlayer() { stop(); }
 
 bool AudioPlayer::load(const std::string& path, bool loop) {
     impl->path = path;
@@ -63,7 +60,9 @@ bool AudioPlayer::load(const std::string& path, bool loop) {
 bool AudioPlayer::play() {
     if (impl->path.empty() || impl->playing) return false;
     impl->playing = true;
-    impl->worker = std::thread([this]{ impl->run(); });
+    // keep Impl alive even if AudioPlayer is destroyed
+    auto self = impl;
+    impl->worker = std::thread([self]{ self->run(); });
     return true;
 }
 
@@ -75,7 +74,7 @@ void AudioPlayer::stop() {
         std::string cmd = "pkill -f \"" + prog + "\" > /dev/null 2>&1";
         std::system(cmd.c_str());
     }
-    if (impl->worker.joinable()) impl->worker.join();
+    if (impl->worker.joinable()) impl->worker.detach();
 }
 
 void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }
