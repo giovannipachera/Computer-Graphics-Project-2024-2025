@@ -3,6 +3,10 @@
 #include <cstdlib>
 #include <string>
 #include <thread>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <unistd.h>
 
 struct AudioPlayer::Impl {
     std::string path;
@@ -10,6 +14,7 @@ struct AudioPlayer::Impl {
     std::atomic<bool> playing{false};
     std::thread worker;
     std::string playerCmd;
+    pid_t pid = -1;
 
     bool findPlayer() {
         const std::string candidates[] = {
@@ -34,15 +39,26 @@ struct AudioPlayer::Impl {
             playing = false;
             return;
         }
-      
+
         std::string baseCmd = playerCmd + " \"" + path + "\"";
         if (playerCmd.find("ffplay") != std::string::npos)
             baseCmd += " >/dev/null 2>&1"; // silence ffplay output
 
         do {
-            std::system(baseCmd.c_str());
+            pid = fork();
+            if (pid == 0) {
+                execl("/bin/sh", "sh", "-c", baseCmd.c_str(), (char*)nullptr);
+                _exit(127);
+            } else if (pid > 0) {
+                int status;
+                waitpid(pid, &status, 0);
+                pid = -1;
+            } else {
+                playing = false;
+                break;
+            }
         } while (loop && playing);
-      
+
         playing = false;
     }
 };
@@ -67,15 +83,17 @@ bool AudioPlayer::play() {
     return true;
 }
 
-void AudioPlayer::stop() {
+void AudioPlayer::stop(bool wait) {
     if (!impl->playing) return;
     impl->playing = false;
-    if (!impl->playerCmd.empty()) {
-        std::string prog = impl->playerCmd.substr(0, impl->playerCmd.find(' '));
-        std::string cmd = "pkill -f \"" + prog + "\" > /dev/null 2>&1";
-        std::system(cmd.c_str());
+    if (impl->pid > 0) {
+        kill(impl->pid, SIGKILL);
     }
-    if (impl->worker.joinable()) impl->worker.join();
+    if (wait) {
+        if (impl->worker.joinable()) impl->worker.join();
+    } else {
+        if (impl->worker.joinable()) impl->worker.detach();
+    }
 }
 
 void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }

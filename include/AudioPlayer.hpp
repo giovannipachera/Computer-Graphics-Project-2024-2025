@@ -8,7 +8,7 @@ public:
 
     bool load(const std::string& path, bool loop=false); // mp3/wav/ogg/flac…
     bool play();     // non blocca, usa un player esterno disponibile
-    void stop();     // rilascia la traccia corrente
+    void stop(bool wait = true);     // rilascia la traccia corrente (wait=false: non blocca)
     void setLoop(bool loop);
     bool isPlaying() const;
 

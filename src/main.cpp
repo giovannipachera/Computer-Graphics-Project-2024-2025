@@ -147,8 +147,8 @@ protected:
     void localCleanup() {
         for (int i=0;i<SC.InstanceCount;++i) delete deltaP[i];
         free(deltaP); free(deltaA); free(usePitch);
-        classicAudio.stop();
-        barbieAudio.stop();
+        classicAudio.stop(true);
+        barbieAudio.stop(true);
         DSL.cleanup(); P.destroy(); SC.localCleanup(); txt.localCleanup();
     }
     void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
@@ -184,8 +184,8 @@ protected:
         prevO = curO;
 
         if (currentBody != lastBody) {
-            if (lastBody == 0) classicAudio.stop();
-            else if (lastBody == 1) barbieAudio.stop();
+            if (lastBody == 0) classicAudio.stop(false);
+            else if (lastBody == 1) barbieAudio.stop(false);
 
             if (currentBody == 0) classicAudio.play();
             else if (currentBody == 1) barbieAudio.play();
