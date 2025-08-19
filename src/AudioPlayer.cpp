@@ -1,21 +1,21 @@
 #include "AudioPlayer.hpp"
+#include <algorithm>
 #include <atomic>
+#include <csignal>
 #include <cstdlib>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
-#include <mutex>
-#include <algorithm>
-#include <csignal>
 
 #ifdef _WIN32
-#include <windows.h>
 #include <mmsystem.h>
+#include <windows.h>
 #pragma comment(lib, "winmm.lib")
 #else
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
 #include <unistd.h>
 #ifdef __linux__
 #include <sys/prctl.h>
@@ -24,144 +24,151 @@
 
 namespace {
 std::mutex g_playersMutex;
-std::vector<AudioPlayer*> g_players;
+std::vector<AudioPlayer *> g_players;
 
 void stopAllPlayers() {
-    std::lock_guard<std::mutex> lock(g_playersMutex);
-    for (auto* p : g_players) {
-        if (p) p->stop(false);
-    }
+  std::lock_guard<std::mutex> lock(g_playersMutex);
+  for (auto *p : g_players) {
+    if (p)
+      p->stop(false);
+  }
 }
 
 void handleSignal(int sig) {
-    stopAllPlayers();
-    std::_Exit(128 + sig);
+  stopAllPlayers();
+  std::_Exit(128 + sig);
 }
-}
+} // namespace
 
 struct AudioPlayer::Impl {
-    std::string path;
-    bool loop = false;
-    std::atomic<bool> playing{false};
-    std::thread worker;
+  std::string path;
+  bool loop = false;
+  std::atomic<bool> playing{false};
+  std::thread worker;
 
 #ifdef _WIN32
-    void run() {
-        UINT flags = SND_FILENAME | SND_ASYNC;
-        if (loop) flags |= SND_LOOP;
-        PlaySound(path.c_str(), NULL, flags);
-        while (playing) std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        PlaySound(NULL, NULL, 0); // stop any playing sound
-    }
+  void run() {
+    UINT flags = SND_FILENAME | SND_ASYNC;
+    if (loop)
+      flags |= SND_LOOP;
+    PlaySound(path.c_str(), NULL, flags);
+    while (playing)
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    PlaySound(NULL, NULL, 0); // stop any playing sound
+  }
 #else
-    std::string playerCmd;
-    pid_t pid = -1;
+  std::string playerCmd;
+  pid_t pid = -1;
 
-    bool findPlayer() {
-        const std::string candidates[] = {
-            "ffplay -nodisp -autoexit", // ffmpeg
-            "aplay",                    // ALSA
-            "afplay",                   // macOS
-            "open"                      // fallback (macOS)
-        };
-        for (const auto& base : candidates) {
-            std::string program = base.substr(0, base.find(' '));
-            std::string cmd = "which " + program + " > /dev/null 2>&1";
-            if (std::system(cmd.c_str()) == 0) {
-                playerCmd = base;
-                return true;
-            }
-        }
-        return false;
+  bool findPlayer() {
+    const std::string candidates[] = {
+        "ffplay -nodisp -autoexit", // ffmpeg
+        "aplay",                    // ALSA
+        "afplay",                   // macOS
+        "open"                      // fallback (macOS)
+    };
+    for (const auto &base : candidates) {
+      std::string program = base.substr(0, base.find(' '));
+      std::string cmd = "which " + program + " > /dev/null 2>&1";
+      if (std::system(cmd.c_str()) == 0) {
+        playerCmd = base;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void run() {
+    if (playerCmd.empty() && !findPlayer()) {
+      playing = false;
+      return;
     }
 
-    void run() {
-        if (playerCmd.empty() && !findPlayer()) {
-            playing = false;
-            return;
-        }
+    std::string baseCmd = playerCmd + " \"" + path + "\"";
+    if (playerCmd.find("ffplay") != std::string::npos)
+      baseCmd += " >/dev/null 2>&1"; // silence ffplay output
 
-        std::string baseCmd = playerCmd + " \"" + path + "\"";
-        if (playerCmd.find("ffplay") != std::string::npos)
-            baseCmd += " >/dev/null 2>&1"; // silence ffplay output
-
-        do {
-            pid = fork();
-            if (pid == 0) {
-                #ifdef __linux__
-                // ensure the player process dies if the parent application terminates
-                prctl(PR_SET_PDEATHSIG, SIGKILL);
-                #endif
-                setpgid(0, 0); // new process group so we can kill children
-                execl("/bin/sh", "sh", "-c", baseCmd.c_str(), (char*)nullptr);
-                _exit(127);
-            } else if (pid > 0) {
-                int status;
-                waitpid(pid, &status, 0);
-                pid = -1;
-            } else {
-                playing = false;
-                break;
-            }
-        } while (loop && playing);
-
+    do {
+      pid = fork();
+      if (pid == 0) {
+#ifdef __linux__
+        // ensure the player process dies if the parent application terminates
+        prctl(PR_SET_PDEATHSIG, SIGKILL);
+#endif
+        setpgid(0, 0); // new process group so we can kill children
+        execl("/bin/sh", "sh", "-c", baseCmd.c_str(), (char *)nullptr);
+        _exit(127);
+      } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+        pid = -1;
+      } else {
         playing = false;
-    }
+        break;
+      }
+    } while (loop && playing);
+
+    playing = false;
+  }
 #endif
 };
 
 AudioPlayer::AudioPlayer() : impl(new Impl) {
-    std::lock_guard<std::mutex> lock(g_playersMutex);
-    if (g_players.empty()) {
-        std::atexit(stopAllPlayers);
-        std::signal(SIGINT, handleSignal);
-        std::signal(SIGTERM, handleSignal);
-    }
-    g_players.push_back(this);
+  std::lock_guard<std::mutex> lock(g_playersMutex);
+  if (g_players.empty()) {
+    std::atexit(stopAllPlayers);
+    std::signal(SIGINT, handleSignal);
+    std::signal(SIGTERM, handleSignal);
+  }
+  g_players.push_back(this);
 }
 
 AudioPlayer::~AudioPlayer() {
-    stop();
-    {
-        std::lock_guard<std::mutex> lock(g_playersMutex);
-        auto it = std::find(g_players.begin(), g_players.end(), this);
-        if (it != g_players.end()) g_players.erase(it);
-    }
-    delete impl;
+  stop();
+  {
+    std::lock_guard<std::mutex> lock(g_playersMutex);
+    auto it = std::find(g_players.begin(), g_players.end(), this);
+    if (it != g_players.end())
+      g_players.erase(it);
+  }
+  delete impl;
 }
 
-bool AudioPlayer::load(const std::string& path, bool loop) {
-    impl->path = path;
-    impl->loop = loop;
-    return true;
+bool AudioPlayer::load(const std::string &path, bool loop) {
+  impl->path = path;
+  impl->loop = loop;
+  return true;
 }
 
 bool AudioPlayer::play() {
-    if (impl->path.empty() || impl->playing) return false;
-    impl->playing = true;
-    impl->worker = std::thread([this]{ impl->run(); });
-    return true;
+  if (impl->path.empty() || impl->playing)
+    return false;
+  impl->playing = true;
+  impl->worker = std::thread([this] { impl->run(); });
+  return true;
 }
 
 void AudioPlayer::stop(bool wait) {
-    if (!impl->playing) return;
-    impl->playing = false;
+  if (!impl->playing)
+    return;
+  impl->playing = false;
 #ifdef _WIN32
-    PlaySound(NULL, NULL, 0);
+  PlaySound(NULL, NULL, 0);
 #else
-    if (impl->pid > 0) {
-        // kill the whole process group to terminate the player
-        kill(-impl->pid, SIGKILL);
-    }
+  if (impl->pid > 0) {
+    // kill the whole process group to terminate the player
+    kill(-impl->pid, SIGKILL);
+  }
 #endif
-    if (wait) {
-        if (impl->worker.joinable()) impl->worker.join();
-    } else {
-        if (impl->worker.joinable()) impl->worker.detach();
-    }
+  if (wait) {
+    if (impl->worker.joinable())
+      impl->worker.join();
+  } else {
+    if (impl->worker.joinable())
+      impl->worker.detach();
+  }
 }
 
 void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }
 
 bool AudioPlayer::isPlaying() const { return impl->playing; }
-
