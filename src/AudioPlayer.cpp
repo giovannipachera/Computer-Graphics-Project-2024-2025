@@ -13,6 +13,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#ifdef __linux__
+#include <sys/prctl.h>
+#endif
 #endif
 
 struct AudioPlayer::Impl {
@@ -64,6 +67,10 @@ struct AudioPlayer::Impl {
         do {
             pid = fork();
             if (pid == 0) {
+                #ifdef __linux__
+                // ensure the player process dies if the parent application terminates
+                prctl(PR_SET_PDEATHSIG, SIGKILL);
+                #endif
                 setpgid(0, 0); // new process group so we can kill children
                 execl("/bin/sh", "sh", "-c", baseCmd.c_str(), (char*)nullptr);
                 _exit(127);
