@@ -3,6 +3,10 @@
 #include <cstdlib>
 #include <string>
 #include <thread>
+#include <vector>
+#include <mutex>
+#include <algorithm>
+#include <csignal>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -17,6 +21,23 @@
 #include <sys/prctl.h>
 #endif
 #endif
+
+namespace {
+std::mutex g_playersMutex;
+std::vector<AudioPlayer*> g_players;
+
+void stopAllPlayers() {
+    std::lock_guard<std::mutex> lock(g_playersMutex);
+    for (auto* p : g_players) {
+        if (p) p->stop(false);
+    }
+}
+
+void handleSignal(int sig) {
+    stopAllPlayers();
+    std::_Exit(128 + sig);
+}
+}
 
 struct AudioPlayer::Impl {
     std::string path;
@@ -89,10 +110,23 @@ struct AudioPlayer::Impl {
 #endif
 };
 
-AudioPlayer::AudioPlayer() : impl(new Impl) {}
+AudioPlayer::AudioPlayer() : impl(new Impl) {
+    std::lock_guard<std::mutex> lock(g_playersMutex);
+    if (g_players.empty()) {
+        std::atexit(stopAllPlayers);
+        std::signal(SIGINT, handleSignal);
+        std::signal(SIGTERM, handleSignal);
+    }
+    g_players.push_back(this);
+}
 
 AudioPlayer::~AudioPlayer() {
     stop();
+    {
+        std::lock_guard<std::mutex> lock(g_playersMutex);
+        auto it = std::find(g_players.begin(), g_players.end(), this);
+        if (it != g_players.end()) g_players.erase(it);
+    }
     delete impl;
 }
 
