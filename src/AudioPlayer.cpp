@@ -69,12 +69,15 @@ bool AudioPlayer::play() {
 void AudioPlayer::stop() {
     if (!impl->playing) return;
     impl->playing = false;
-    if (!impl->playerCmd.empty()) {
-        std::string prog = impl->playerCmd.substr(0, impl->playerCmd.find(' '));
-        std::string cmd = "pkill -f \"" + prog + "\" > /dev/null 2>&1";
-        std::system(cmd.c_str());
-    }
-    if (impl->worker.joinable()) impl->worker.detach();
+    auto self = impl; // keep implementation alive asynchronously
+    std::thread([self]{
+        if (!self->playerCmd.empty()) {
+            std::string prog = self->playerCmd.substr(0, self->playerCmd.find(' '));
+            std::string cmd = "pkill -f \"" + prog + "\" > /dev/null 2>&1";
+            std::system(cmd.c_str());
+        }
+        if (self->worker.joinable()) self->worker.join();
+    }).detach();
 }
 
 void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }
