@@ -184,8 +184,8 @@ protected:
         prevO = curO;
 
         if (currentBody != lastBody) {
-            if (lastBody == 0) classicAudio.stop(false);
-            else if (lastBody == 1) barbieAudio.stop(false);
+            if (lastBody == 0) classicAudio.stop(true);
+            else if (lastBody == 1) barbieAudio.stop(true);
 
             if (currentBody == 0) classicAudio.play();
             else if (currentBody == 1) barbieAudio.play();
