@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 
 class AudioPlayer {
@@ -13,5 +14,5 @@ public:
     bool isPlaying() const;
 
 private:
-    struct Impl; Impl* impl;
+    struct Impl; std::shared_ptr<Impl> impl;
 };
