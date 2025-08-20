@@ -6,7 +6,7 @@
 		{"id":"bw", "model":"assets/models/back_wheel.gltf",   "format":"GLTF"},
 		{"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
 		{"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
-		{"id":"prm", "model":"assets/models/City_6_Industrial.gltf", "format":"GLTF"}
+		{"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"}
 	],
 	"textures": [
 		{"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -50,6 +50,6 @@
 			"transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
 
 		{ "id":"prm", "model":"prm", "texture":"t6",
-			"transform":[0.03,0,0,200, 0,0.03,0,0.3, 0,0,0.03,120, 0,0,0,1] }
+			"transform":[ 1,0,0,0,  0,-1,0,25,  0,0,1,0,  0,0,0,1 ] }
 	]
 }
