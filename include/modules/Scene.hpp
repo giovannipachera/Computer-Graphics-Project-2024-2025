@@ -65,10 +65,10 @@ class Scene {
 			TextureCount = ts.size();
 			std::cout << "Textures count: " << TextureCount << "\n";
 
-			T = (Texture **)calloc(ModelCount, sizeof(Texture *));
-			for(int k = 0; k < TextureCount; k++) {
-				TextureIds[ts[k]["id"]] = k;
-				T[k] = new Texture();
+                        T = (Texture **)calloc(TextureCount, sizeof(Texture *));
+                        for(int k = 0; k < TextureCount; k++) {
+                                TextureIds[ts[k]["id"]] = k;
+                                T[k] = new Texture();
 
 				T[k]->init(BP, ts[k]["texture"]);
 			}
