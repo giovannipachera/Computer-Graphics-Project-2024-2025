@@ -103,8 +103,8 @@ protected:
     SC.init(this, &VD, DSL, P, "assets/models/scene.json");
     txt.init(this, &outText);
 
-    classicAudio.load("assets/audio/classic.wav", true);
-    barbieAudio.load("assets/audio/barbie.wav", true);
+    classicAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\classic.wav", true);
+    barbieAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\barbie.wav", true);
     classicAudio.play();
     lastBody = currentBody;
 
