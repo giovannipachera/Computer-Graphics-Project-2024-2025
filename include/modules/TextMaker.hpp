@@ -35,8 +35,10 @@ struct SingleText {
 
 struct TextVertex {
         glm::vec2 pos;
+
         glm::vec2 texCoord;
         glm::vec3 color;
+
 };
 
 
@@ -72,6 +74,7 @@ struct TextMaker {
                                          sizeof(glm::vec2), UV},
                                   {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(TextVertex, color),
                                          sizeof(glm::vec3), COLOR}
+
                                 });
                 DSL.init(BP,
                                 {{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}});
@@ -144,46 +147,58 @@ struct TextMaker {
                                                         (float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
                                                         (float)(tpy + d.yoffset) * PtoTsy + PtoTdy
                                                 };
+
                                                 V_vertex->texCoord = {
                                                         (float)d.x / texW,
                                                         (float)d.y / texH
                                                 };
+
                                                 V_vertex->color = {1.0f, 1.0f, 1.0f};
                                                 M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
                                                 // M.vertices.push_back(vertex);
+
 
                                                 V_vertex->pos = {
                                                         (float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
                                                         (float)(float)(tpy + d.yoffset) * PtoTsy + PtoTdy
                                                 };
+
                                                 V_vertex->texCoord = {
                                                         (float)(float)(d.x + d.width) / texW,
                                                         (float)d.y / texH
                                                 };
+
                                                 V_vertex->color = {1.0f, 1.0f, 1.0f};
                                                 M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+
 
                                                 V_vertex->pos = {
                                                         (float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
                                                         (float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy
                                                 };
+
                                                 V_vertex->texCoord = {
                                                         (float)(d.x ) / texW,
                                                         (float)(d.y + d.height) / texH
                                                 };
+
                                                 V_vertex->color = {1.0f, 1.0f, 1.0f};
                                                 M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+
 
                                                 V_vertex->pos = {
                                                         (float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
                                                         (float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy
                                                 };
+
                                                 V_vertex->texCoord = {
                                                         (float)(d.x + d.width) / texW,
                                                         (float)(d.y + d.height) / texH
                                                 };
+
                                                 V_vertex->color = {1.0f, 1.0f, 1.0f};
                                                 M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+
 
 						M.indices[ib + 0] = 4 * k + 0;
 						M.indices[ib + 1] = 4 * k + 1;
