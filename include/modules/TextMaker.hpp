@@ -93,7 +93,7 @@ struct TextMaker {
 
 		M.initMesh(BP, &VD);
 
-		T.init(BP, "assets/textures/Fonts.png", VK_FORMAT_R8G8B8A8_UNORM, true);
+		T.init(BP, "assets/textures/Fonts.png", VK_FORMAT_R8G8B8A8_SRGB, true);
 	}
 
 

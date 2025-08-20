@@ -5,8 +5,8 @@
 #include "modules/TextMaker.hpp"
 
 std::vector<SingleText> outText = {
-    {1, {"Classic - Nashville Skyline Rag", "", "", ""}, 0, 0},
-    {2, {"Barbie", "Nashville Skyline Rag (Bob Dylan)", "", ""}, 0, 0}};
+    {1, {"Classic", "", "", ""}, 0, 0},
+    {2, {"Barbie", "", "", ""}, 0, 0}};
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 mvpMat;
