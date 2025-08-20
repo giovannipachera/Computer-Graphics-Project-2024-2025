@@ -1,0 +1,12 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025" -B "/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug"
+-- Vulkan found at /Users/giovannipachera/VulkanSDK/1.4.304.0/macOS/include
+-- Found SPIR-V files: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/PhongFrag.spv;/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/PhongVert.spv;/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/ShaderFrag.spv;/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/ShaderVert.spv;/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/TextFrag.spv;/Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/TextVert.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/PhongFrag.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/PhongVert.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/ShaderFrag.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/ShaderVert.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/TextFrag.spv
+-- Copying SPIR-V file: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/shaders/TextVert.spv
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/giovannipachera/Desktop/Computer Graphics/Project/Computer-Graphics-Project-2024-2025/cmake-build-debug
