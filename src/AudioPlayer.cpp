@@ -10,6 +10,13 @@
 #include <vector>
 #include <chrono>
 #include <cstdio>
+#include <cwctype>
+#include <filesystem>
+#include <iostream>
+
+
+
+
 
 #ifdef _WIN32
   #define NOMINMAX
@@ -90,7 +97,7 @@ struct AudioPlayer::Impl {
         std::snprintf(line, sizeof(line), "[AUDIO][MCI ERROR]%s%s%s -> %s\n",
                       ctx ? " (" : "", ctx ? ctx : "", ctx ? ")" : "", mb);
         OutputDebugStringA(line);
-        std::fwrite(line, 1, std::strlen(line), stderr);
+        std::fwrite(line, 1, strlen(line), stderr);
       }
       return false;
     }
@@ -111,21 +118,42 @@ struct AudioPlayer::Impl {
   bool tryPlaySoundLoopIfWav() {
     auto ext = lowerExt(pathW);
     if (ext != L"wav") return false;
-    DWORD flags = SND_FILENAME | SND_ASYNC | (loop ? SND_LOOP : 0);
-    if (!PlaySoundW(pathW.c_str(), nullptr, flags)) {
-      OutputDebugStringA("[AUDIO] PlaySoundW failed\n");
+
+    // 🔹 Debug: controlla se il file esiste
+    if (!std::filesystem::exists(path)) {
+      OutputDebugStringA("[AUDIO][DEBUG] File WAV non trovato!\n");
       return false;
     }
-    // Mantieni vivo finché playing
+
+    DWORD flags = SND_FILENAME | SND_ASYNC | (loop ? SND_LOOP : 0);
+
+    // 🔹 Debug: prova PlaySoundW e segnala se fallisce
+    if (!PlaySoundW(pathW.c_str(), nullptr, flags)) {
+      OutputDebugStringA("[AUDIO][DEBUG] PlaySoundW fallito!\n");
+      return false; // esci subito invece di continuare il loop
+    }
+
+    OutputDebugStringA("[AUDIO][DEBUG] PlaySoundW partito correttamente\n");
+
     while (playing) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+
     PlaySoundW(nullptr, nullptr, 0); // stop
+    OutputDebugStringA("[AUDIO][DEBUG] PlaySoundW fermato\n");
     return true;
   }
 
+
   void run() {
     pathW = toWide(path);
+
+    std::wstring wpath = toWide(path);
+    std::wcout << L"[DEBUG] File wide path: " << wpath << std::endl;
+
+
+
+
 
     // Prova subito con PlaySound per WAV (robustissimo)
     if (tryPlaySoundLoopIfWav()) {
