@@ -1,3 +1,4 @@
+// AudioPlayer.cpp — versione robusta Windows + *nix
 #include "AudioPlayer.hpp"
 #include <algorithm>
 #include <atomic>
@@ -7,19 +8,22 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <chrono>
+#include <cstdio>
 
 #ifdef _WIN32
-#include <windows.h>
-#include <mmsystem.h>
-#pragma comment(lib, "winmm.lib")
+  #define NOMINMAX
+  #include <windows.h>
+  #include <mmsystem.h>
+  #pragma comment(lib, "winmm.lib")
 #else
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#ifdef __linux__
-#include <sys/prctl.h>
-#endif
+  #include <signal.h>
+  #include <sys/types.h>
+  #include <sys/wait.h>
+  #include <unistd.h>
+  #ifdef __linux__
+    #include <sys/prctl.h>
+  #endif
 #endif
 
 namespace {
@@ -46,80 +50,156 @@ struct AudioPlayer::Impl {
   std::thread worker;
 
 #ifdef _WIN32
-  // Alias MCI univoco per istanza
-  std::string mciAlias;
+  // === Windows (MCI wide) ===
+  std::wstring mciAliasW;
+  std::wstring pathW;
 
-  static std::string toLowerExt(const std::string& p) {
-    auto pos = p.find_last_of('.');
-    std::string ext = (pos == std::string::npos) ? "" : p.substr(pos + 1);
-    for (auto& c : ext) c = (char)std::tolower((unsigned char)c);
+  static std::wstring toWide(const std::string& s) {
+    if (s.empty()) return L"";
+    int len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, nullptr, 0);
+    std::wstring w(len ? len - 1 : 0, L'\0');
+    if (len) MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, &w[0], len);
+    return w;
+  }
+
+  static std::wstring lowerExt(const std::wstring& p) {
+    size_t pos = p.find_last_of(L'.');
+    std::wstring ext = (pos == std::wstring::npos) ? L"" : p.substr(pos + 1);
+    for (auto& c : ext) c = (wchar_t)std::towlower(c);
     return ext;
   }
 
-  static std::string guessMciType(const std::string& p) {
-    const std::string ext = toLowerExt(p);
-    if (ext == "wav")  return "waveaudio";
-    if (ext == "mp3")  return "mpegvideo";
-    if (ext == "wma")  return "mpegvideo";
-    if (ext == "aac" || ext == "m4a") return "mpegvideo";
-    // Fallback: lasciamo che MCI provi a dedurre
-    return "";
+  static std::wstring guessMciType(const std::wstring& p) {
+    auto ext = lowerExt(p);
+    if (ext == L"wav")  return L"waveaudio";
+    if (ext == L"mp3")  return L"mpegvideo";
+    if (ext == L"wma")  return L"mpegvideo";
+    if (ext == L"aac" || ext == L"m4a") return L"mpegvideo";
+    return L""; // lascia dedurre a MCI
   }
 
-  static bool mciOk(const std::string& cmd) {
-    MCIERROR err = mciSendStringA(cmd.c_str(), nullptr, 0, nullptr);
-    return err == 0;
+  static bool mciOk(const std::wstring& cmd, const char* ctx = nullptr) {
+    MCIERROR err = mciSendStringW(cmd.c_str(), nullptr, 0, nullptr);
+    if (err != 0) {
+      wchar_t buf[256]{};
+      mciGetErrorStringW(err, buf, 255);
+      char mb[512];
+      int n = WideCharToMultiByte(CP_UTF8, 0, buf, -1, mb, sizeof(mb), nullptr, nullptr);
+      if (n > 0) {
+        char line[1024];
+        std::snprintf(line, sizeof(line), "[AUDIO][MCI ERROR]%s%s%s -> %s\n",
+                      ctx ? " (" : "", ctx ? ctx : "", ctx ? ")" : "", mb);
+        OutputDebugStringA(line);
+        std::fwrite(line, 1, std::strlen(line), stderr);
+      }
+      return false;
+    }
+    return true;
   }
 
   void mciClose() {
-    if (!mciAlias.empty()) {
-      std::string stopCmd  = "stop "  + mciAlias;
-      std::string closeCmd = "close " + mciAlias;
-      mciSendStringA(stopCmd.c_str(),  nullptr, 0, nullptr);
-      mciSendStringA(closeCmd.c_str(), nullptr, 0, nullptr);
-      mciAlias.clear();
+    if (!mciAliasW.empty()) {
+      std::wstring stopCmd  = L"stop "  + mciAliasW;
+      std::wstring closeCmd = L"close " + mciAliasW;
+      mciSendStringW(stopCmd.c_str(),  nullptr, 0, nullptr);
+      mciSendStringW(closeCmd.c_str(), nullptr, 0, nullptr);
+      mciAliasW.clear();
     }
   }
 
-  void run() {
-    // Prepara alias univoco
-    if (mciAlias.empty()) {
-      mciAlias = "ap_" + std::to_string(reinterpret_cast<uintptr_t>(this));
+  // Fallback solo per WAV (sincrono ma rodato)
+  bool tryPlaySoundLoopIfWav() {
+    auto ext = lowerExt(pathW);
+    if (ext != L"wav") return false;
+    DWORD flags = SND_FILENAME | SND_ASYNC | (loop ? SND_LOOP : 0);
+    if (!PlaySoundW(pathW.c_str(), nullptr, flags)) {
+      OutputDebugStringA("[AUDIO] PlaySoundW failed\n");
+      return false;
     }
+    // Mantieni vivo finché playing
+    while (playing) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    PlaySoundW(nullptr, nullptr, 0); // stop
+    return true;
+  }
 
-    // Chiudi eventuale device precedente (robusto contro play multipli)
-    mciClose();
+  void run() {
+    pathW = toWide(path);
 
-    // Determina tipo MCI (per MP3/WAV)
-    std::string mciType = guessMciType(path);
-
-    // Apri file
-    std::string openCmd = "open \"" + path + "\"";
-    if (!mciType.empty()) openCmd += " type " + mciType;
-    openCmd += " alias " + mciAlias;
-
-    if (!mciOk(openCmd)) {
-      playing = false; // non riesce ad aprire: fermiamo
+    // Prova subito con PlaySound per WAV (robustissimo)
+    if (tryPlaySoundLoopIfWav()) {
       return;
     }
 
-    // Avvia playback (loop con "repeat")
-    std::string playCmd = "play " + mciAlias + (loop ? " repeat" : "");
-    if (!mciOk(playCmd)) {
+    // Prepara alias univoco
+    if (mciAliasW.empty()) {
+      wchar_t temp[64];
+      std::swprintf(temp, 64, L"ap_%p", (void*)this);
+      mciAliasW = temp;
+    }
+
+    // Chiudi eventuale device precedente
+    mciClose();
+
+    std::wstring mciType = guessMciType(pathW);
+
+    // Apri file
+    std::wstring openCmd = L"open \"" + pathW + L"\"";
+    if (!mciType.empty()) openCmd += L" type " + mciType;
+    openCmd += L" alias " + mciAliasW + L" shareable";
+    if (!mciOk(openCmd, "open")) {
+      playing = false;
+      return;
+    }
+
+    // Imposta time format (alcuni mpegvideo lo richiedono)
+    if (!mciOk(L"set " + mciAliasW + L" time format milliseconds", "set time format")) {
       mciClose();
       playing = false;
       return;
     }
 
+    // Avvio
+    std::wstring playCmd = L"play " + mciAliasW + (loop ? L" repeat" : L"");
+    if (!mciOk(playCmd, "play")) {
+      // Tentiamo un seek e riproviamo una volta
+      mciOk(L"seek " + mciAliasW + L" to start", "seek start (retry)");
+      if (!mciOk(playCmd, "play (retry)")) {
+        mciClose();
+        playing = false;
+        return;
+      }
+    }
+
     // Mantieni vivo il thread finché playing è true
+    // (Se repeat non funzionasse per il codec, riavviamo manualmente)
+    auto lastCheck = std::chrono::steady_clock::now();
     while (playing) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+      if (!loop) continue;
+
+      // ogni 500ms controlla lo stato
+      auto now = std::chrono::steady_clock::now();
+      if (now - lastCheck < std::chrono::milliseconds(500)) continue;
+      lastCheck = now;
+
+      wchar_t mode[64]{};
+      if (mciSendStringW((L"status " + mciAliasW + L" mode").c_str(), mode, 63, nullptr) == 0) {
+        if (std::wcscmp(mode, L"stopped") == 0) {
+          // loop manuale
+          mciOk(L"seek " + mciAliasW + L" to start", "seek loop");
+          mciOk(L"play " + mciAliasW, "play loop");
+        }
+      }
     }
 
     // Stop e close puliti
     mciClose();
   }
 #else
+  // === Unix/macOS (processo esterno) ===
   std::string playerCmd;
   pid_t pid = -1;
 
@@ -155,7 +235,6 @@ struct AudioPlayer::Impl {
       pid = fork();
       if (pid == 0) {
 #ifdef __linux__
-        // se il parent muore, uccidi il player
         prctl(PR_SET_PDEATHSIG, SIGKILL);
 #endif
         setpgid(0, 0); // nuovo process group
@@ -182,6 +261,9 @@ AudioPlayer::AudioPlayer() : impl(new Impl) {
     std::atexit(stopAllPlayers);
     std::signal(SIGINT,  handleSignal);
     std::signal(SIGTERM, handleSignal);
+#ifdef SIGABRT
+    std::signal(SIGABRT, handleSignal);
+#endif
   }
   g_players.push_back(this);
 }
@@ -207,8 +289,12 @@ bool AudioPlayer::play() {
   impl->playing = true;
 
 #ifdef _WIN32
-  // Prepara alias prima di lanciare il thread (così stop() sa cosa chiudere subito)
-  impl->mciAlias = "ap_" + std::to_string(reinterpret_cast<uintptr_t>(this));
+  // Prepara alias subito (utile se stop() arriva prestissimo)
+  if (impl->mciAliasW.empty()) {
+    wchar_t temp[64];
+    std::swprintf(temp, 64, L"ap_%p", (void*)impl);
+    impl->mciAliasW = temp;
+  }
 #endif
 
   impl->worker = std::thread([this] { impl->run(); });
@@ -220,13 +306,13 @@ void AudioPlayer::stop(bool wait) {
   impl->playing = false;
 
 #ifdef _WIN32
-  // Ferma immediatamente il device MCI se già aperto
-  if (!impl->mciAlias.empty()) {
-    std::string stopCmd  = "stop "  + impl->mciAlias;
-    std::string closeCmd = "close " + impl->mciAlias;
-    mciSendStringA(stopCmd.c_str(),  nullptr, 0, nullptr);
-    mciSendStringA(closeCmd.c_str(), nullptr, 0, nullptr);
-    impl->mciAlias.clear();
+  // Ferma immediatamente il device MCI se aperto
+  if (!impl->mciAliasW.empty()) {
+    std::wstring stopCmd  = L"stop "  + impl->mciAliasW;
+    std::wstring closeCmd = L"close " + impl->mciAliasW;
+    mciSendStringW(stopCmd.c_str(),  nullptr, 0, nullptr);
+    mciSendStringW(closeCmd.c_str(), nullptr, 0, nullptr);
+    impl->mciAliasW.clear();
   }
 #else
   if (impl->pid > 0) {
@@ -243,5 +329,4 @@ void AudioPlayer::stop(bool wait) {
 }
 
 void AudioPlayer::setLoop(bool loop) { impl->loop = loop; }
-
 bool AudioPlayer::isPlaying() const { return impl->playing; }
