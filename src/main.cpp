@@ -181,6 +181,23 @@ protected:
     txt.populateCommandBuffer(cb, currentImage, currScene);
   }
 
+  void reRecordCommandBuffers() {
+    vkDeviceWaitIdle(device);
+    vkFreeCommandBuffers(device, commandPool,
+                         static_cast<uint32_t>(commandBuffers.size()),
+                         commandBuffers.data());
+    createCommandBuffers();
+  }
+
+  void refreshUIResources() {
+    logo.pipelinesAndDescriptorSetsCleanup();
+    txt.pipelinesAndDescriptorSetsCleanup();
+    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+    createDescriptorPool();
+    pipelinesAndDescriptorSetsInit();
+    reRecordCommandBuffers();
+  }
+
   // Correzione SOLO per 'prm' (GLTF Z-up) → mondo Y-up. OBJ (pln) invariato.
   glm::mat4 baseFor(const std::string &id) {
     if (id == "prm") {
@@ -225,6 +242,7 @@ protected:
 
       logo.setCurrentLogo(currentBody);
       currScene = currentBody;
+      refreshUIResources();
 
       lastBody = currentBody;
     }
