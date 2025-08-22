@@ -126,8 +126,10 @@ protected:
     lastBody = currentBody;
 
     // Indici utili
-    tbIndex = SC.InstanceIds["tb"];
-    tractorPartIdx.insert(tbIndex);
+    for (const std::string &bodyName : tractorBodies) {
+      tractorPartIdx.insert(SC.InstanceIds[bodyName]);
+    }
+    tbIndex = SC.InstanceIds[tractorBodies[currentBody]];
     tractorPartIdx.insert(SC.InstanceIds["ax"]);
     tractorPartIdx.insert(SC.InstanceIds["flw"]);
     tractorPartIdx.insert(SC.InstanceIds["frw"]);
@@ -157,8 +159,6 @@ protected:
 
     tractorRadius = computeInstanceSphere(tbIndex).radius * 1.1f;
     for (int i = 0; i < SC.InstanceCount; ++i) {
-      if (i == tbIndex)
-        continue;
       if (tractorPartIdx.count(i) && i != plowIndex)
         continue;
       std::string id = *SC.I[i].id;
