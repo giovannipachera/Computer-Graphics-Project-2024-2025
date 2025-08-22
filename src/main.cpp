@@ -65,6 +65,16 @@ protected:
   std::unordered_set<int> tractorPartIdx;
   int tbIndex = -1;
 
+  // Plow management
+  std::string plowId = "plw";       // expected identifier of the plow instance
+  int plowIndex = -1;                // index of the plow in the scene instances
+  bool plowAttached = false;         // whether the plow is currently attached
+  glm::vec3 plowPos;                 // world position when not attached
+  float plowYaw = 0.0f;              // orientation when not attached
+  glm::vec3 plowAttachOffset =       // offset from tractor origin when attached
+      glm::vec3(0.0f, 0.0f, -4.0f);
+  float plowAttachDistance = 3.0f;   // distance threshold for attaching
+
   void setWindowParameters() {
     windowWidth = 800;
     windowHeight = 600;
@@ -118,6 +128,13 @@ protected:
     tractorPartIdx.insert(SC.InstanceIds["brw"]);
     tractorPartIdx.insert(SC.InstanceIds["lf"]);
     tractorPartIdx.insert(SC.InstanceIds["rf"]);
+
+    // Retrieve plow index and initial position if present
+    if (SC.InstanceIds.count(plowId)) {
+      plowIndex = SC.InstanceIds[plowId];
+      plowPos = glm::vec3(SC.I[plowIndex].Wm[3]);
+      plowYaw = 0.0f;
+    }
 
     // Pos del corpo: gestita da codice (non dal JSON)
     Pos = glm::vec3(0.0f, 3.25f, 0.0f);
@@ -262,6 +279,21 @@ protected:
           SteeringAng = 0.0f;
       }
     }
+
+    // Check for plow attachment
+    static int prevSpace = GLFW_RELEASE;
+    int curSpace = glfwGetKey(window, GLFW_KEY_SPACE);
+    if (!plowAttached && plowIndex != -1) {
+      glm::vec3 hitchWorld =
+          Pos + glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0, 1, 0)) *
+                           glm::vec4(plowAttachOffset, 1));
+      float dist = glm::distance(plowPos, hitchWorld);
+      if (curSpace == GLFW_PRESS && prevSpace == GLFW_RELEASE &&
+          dist < plowAttachDistance) {
+        plowAttached = true;
+      }
+    }
+    prevSpace = curSpace;
 
     // Camera
     CamYaw += ROT_SPEED * deltaT * r.y;
@@ -419,6 +451,23 @@ protected:
 
       SC.DS[iF]->map(currentImage, &ubo, sizeof(ubo), 0);
       SC.DS[iF]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Plow: static or following the tractor
+    if (plowIndex != -1) {
+      glm::mat4 baseTr = baseFor(plowId);
+      if (plowAttached) {
+        glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
+        glm::mat4 localTr =
+            glm::translate(glm::mat4(1.0f), plowAttachOffset);
+        ubo.mMat = bodyTr * localTr * baseTr;
+      } else {
+        ubo.mMat = MakeWorld(plowPos, plowYaw, 0.0f, 0.0f) * baseTr;
+      }
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+      SC.DS[plowIndex]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[plowIndex]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
     // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
