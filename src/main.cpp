@@ -31,6 +31,8 @@ struct Vertex {
 #include "WVP.hpp"
 #include "modules/Scene.hpp"
 #include <unordered_set>
+#include <cfloat>
+#include <algorithm>
 
 class SIMULATOR : public BaseProject {
 protected:
@@ -70,6 +72,14 @@ protected:
   int plowIndex = -1;
   bool plowAttached = false;
   glm::vec3 plowOffset = glm::vec3(0.0f);
+
+  struct Sphere {
+    glm::vec3 center;
+    float radius;
+    int instance;
+  };
+  std::vector<Sphere> obstacles;
+  float tractorRadius = 1.0f;
 
   void setWindowParameters() {
     windowWidth = 800;
@@ -144,6 +154,18 @@ protected:
       deltaA[i] = 0.0f;
       usePitch[i] = 0.0f;
     }
+
+    tractorRadius = computeInstanceSphere(tbIndex).radius * 1.1f;
+    for (int i = 0; i < SC.InstanceCount; ++i) {
+      if (i == tbIndex)
+        continue;
+      if (tractorPartIdx.count(i) && i != plowIndex)
+        continue;
+      std::string id = *SC.I[i].id;
+      if (id == "pln" || id == "prm")
+        continue;
+      obstacles.push_back(computeInstanceSphere(i));
+    }
   }
 
   void pipelinesAndDescriptorSetsInit() {
@@ -196,6 +218,37 @@ protected:
     createDescriptorPool();
     pipelinesAndDescriptorSetsInit();
     reRecordCommandBuffers();
+  }
+
+  Sphere computeInstanceSphere(int idx) {
+    Model *model = SC.M[SC.I[idx].Mid];
+    size_t vCount = model->vertices.size() / sizeof(Vertex);
+    glm::vec3 minV(FLT_MAX), maxV(-FLT_MAX);
+    for (size_t v = 0; v < vCount; ++v) {
+      const Vertex *vert =
+          reinterpret_cast<const Vertex *>(model->vertices.data() + v * sizeof(Vertex));
+      minV = glm::min(minV, vert->pos);
+      maxV = glm::max(maxV, vert->pos);
+    }
+    glm::vec3 centerLocal = (minV + maxV) * 0.5f;
+    float radiusLocal = glm::length(maxV - centerLocal);
+    glm::mat4 W = SC.I[idx].Wm;
+    glm::vec3 centerWorld = glm::vec3(W * glm::vec4(centerLocal, 1.0f));
+    float scaleX = glm::length(glm::vec3(W[0]));
+    float scaleY = glm::length(glm::vec3(W[1]));
+    float scaleZ = glm::length(glm::vec3(W[2]));
+    float maxScale = std::max(scaleX, std::max(scaleY, scaleZ));
+    return {centerWorld, radiusLocal * maxScale, idx};
+  }
+
+  bool isColliding(const glm::vec3 &candidate) {
+    for (const auto &s : obstacles) {
+      if (plowAttached && s.instance == plowIndex)
+        continue;
+      if (glm::distance(candidate, s.center) < (tractorRadius + s.radius))
+        return true;
+    }
+    return false;
   }
 
   // Correzione SOLO per 'prm' (GLTF Z-up) → mondo Y-up. OBJ (pln) invariato.
@@ -272,22 +325,25 @@ protected:
     if (fabs(dampedVel) < eps)
       dampedVel = 0.0f;
 
-    wheelRoll = fmod(wheelRoll - dampedVel / 0.4f + 2 * M_PI, 2 * M_PI);
+    float candidateWheelRoll =
+        fmod(wheelRoll - dampedVel / 0.4f + 2 * M_PI, 2 * M_PI);
 
-    // Cinematica semplice
+    glm::vec3 newPos = Pos;
+    float newYaw = Yaw;
+
     if (dampedVel != 0.0f) {
       if (SteeringAng != 0.0f) {
         const float l = 2.78f;
         float rturn = l / tan(SteeringAng);
-        float cx = Pos.x + rturn * cos(Yaw);
-        float cz = Pos.z - rturn * sin(Yaw);
+        float cx = newPos.x + rturn * cos(newYaw);
+        float cz = newPos.z - rturn * sin(newYaw);
         float Dbeta = dampedVel / rturn;
-        Yaw -= Dbeta;
-        Pos.x = cx - rturn * cos(Yaw);
-        Pos.z = cz + rturn * sin(Yaw);
+        newYaw -= Dbeta;
+        newPos.x = cx - rturn * cos(newYaw);
+        newPos.z = cz + rturn * sin(newYaw);
       } else {
-        Pos.x -= sin(Yaw) * dampedVel;
-        Pos.z -= cos(Yaw) * dampedVel;
+        newPos.x -= sin(newYaw) * dampedVel;
+        newPos.z -= cos(newYaw) * dampedVel;
       }
       if (m.x == 0.0f) {
         if (SteeringAng > STEERING_SPEED * deltaT)
@@ -297,6 +353,14 @@ protected:
         else
           SteeringAng = 0.0f;
       }
+    }
+
+    if (!isColliding(newPos)) {
+      Pos = newPos;
+      Yaw = newYaw;
+      wheelRoll = candidateWheelRoll;
+    } else {
+      dampedVel = 0.0f;
     }
 
     static bool prevFire = false;
