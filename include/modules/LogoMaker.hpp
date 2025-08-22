@@ -16,6 +16,9 @@ struct LogoMaker {
     Texture logos[2];
     DescriptorSet DS[2];
 
+    int currentLogo = 0;
+
+
     void init(BaseProject *_BP) {
         BP = _BP;
         createDescriptorSetAndVertexLayout();
@@ -101,10 +104,13 @@ struct LogoMaker {
         P.destroy();
     }
 
-    void populateCommandBuffer(VkCommandBuffer cb, int currentImage, int idx) {
+    void setCurrentLogo(int idx) { currentLogo = idx; }
+
+    void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
         P.bind(cb);
         M.bind(cb);
-        DS[idx].bind(cb, P, 0, currentImage);
+        DS[currentLogo].bind(cb, P, 0, currentImage);
+
         vkCmdDrawIndexed(cb, 6, 1, 0, 0, 0);
     }
 };

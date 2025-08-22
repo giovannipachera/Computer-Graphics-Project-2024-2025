@@ -175,7 +175,9 @@ protected:
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
     P.bind(cb);
     SC.populateCommandBuffer(cb, currentImage, P);
-    logo.populateCommandBuffer(cb, currentImage, currentBody);
+
+    logo.populateCommandBuffer(cb, currentImage);
+
     txt.populateCommandBuffer(cb, currentImage, currScene);
   }
 
@@ -220,6 +222,9 @@ protected:
         classicAudio.play();
       else if (currentBody == 1)
         barbieAudio.play();
+
+      logo.setCurrentLogo(currentBody);
+      currScene = currentBody;
 
       lastBody = currentBody;
     }
