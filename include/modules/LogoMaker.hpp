@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Starter.hpp"
-
 struct LogoVertex {
     glm::vec2 pos;
     glm::vec2 texCoord;

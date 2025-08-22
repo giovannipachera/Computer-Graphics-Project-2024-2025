@@ -1522,7 +1522,7 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 		}
 	}
 
-        virtual void populateCommandBuffer(VkCommandBuffer commandBuffer, int i) = 0;
+	virtual void populateCommandBuffer(VkCommandBuffer commandBuffer, int i) = 0;
 
     void createCommandBuffers() {
     	commandBuffers.resize(swapChainFramebuffers.size());
@@ -1577,48 +1577,9 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
 				throw std::runtime_error("failed to record command buffer!");
-                }
-        }
-
-    void recordCommandBuffers() {
-        vkDeviceWaitIdle(device);
-        for (size_t i = 0; i < commandBuffers.size(); i++) {
-            vkResetCommandBuffer(commandBuffers[i], 0);
-
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = 0;
-            beginInfo.pInheritanceInfo = nullptr;
-
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = renderPass;
-            renderPassInfo.framebuffer = swapChainFramebuffers[i];
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = swapChainExtent;
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = initialBackgroundColor;
-            clearValues[1].depthStencil = {1.0f, 0};
-
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            populateCommandBuffer(commandBuffers[i], static_cast<int>(i));
-
-            vkCmdEndRenderPass(commandBuffers[i]);
-
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer!");
-            }
-        }
-    }
+			}
+		}
+	}
 
     void createSyncObjects() {
     	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
