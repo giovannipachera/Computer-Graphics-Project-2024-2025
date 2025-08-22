@@ -225,6 +225,9 @@ protected:
 
       logo.setCurrentLogo(currentBody);
       currScene = currentBody;
+      vkDeviceWaitIdle(device);
+      logo.pipelinesAndDescriptorSetsCleanup();
+      logo.pipelinesAndDescriptorSetsInit();
       recordCommandBuffers();
 
       lastBody = currentBody;
