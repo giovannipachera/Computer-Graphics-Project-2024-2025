@@ -175,7 +175,9 @@ protected:
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
     P.bind(cb);
     SC.populateCommandBuffer(cb, currentImage, P);
+
     logo.populateCommandBuffer(cb, currentImage);
+
     txt.populateCommandBuffer(cb, currentImage, currScene);
   }
 

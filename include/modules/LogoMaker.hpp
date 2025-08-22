@@ -15,7 +15,9 @@ struct LogoMaker {
     Model M;
     Texture logos[2];
     DescriptorSet DS[2];
+
     int currentLogo = 0;
+
 
     void init(BaseProject *_BP) {
         BP = _BP;
@@ -108,6 +110,7 @@ struct LogoMaker {
         P.bind(cb);
         M.bind(cb);
         DS[currentLogo].bind(cb, P, 0, currentImage);
+
         vkCmdDrawIndexed(cb, 6, 1, 0, 0, 0);
     }
 };
