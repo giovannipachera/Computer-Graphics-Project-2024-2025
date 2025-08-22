@@ -3,6 +3,7 @@
 #include "AudioPlayer.hpp"
 #include "modules/Starter.hpp"
 #include "modules/TextMaker.hpp"
+#include "modules/LogoMaker.hpp"
 
 std::vector<SingleText> outText = {
     {1, {"Classic", "", "", ""}, 0, 0},
@@ -43,6 +44,7 @@ protected:
   float *usePitch;
 
   TextMaker txt;
+  LogoMaker logo;
 
   int currScene = 0;
   float Ar;
@@ -76,8 +78,8 @@ protected:
     windowResizable = GLFW_TRUE;
     initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f};
     uniformBlocksInPool = 19 * 2 + 2;
-    texturesInPool = 19 + 1;
-    setsInPool = 19 + 1;
+    texturesInPool = 19 + 3;
+    setsInPool = 19 + 3;
     Ar = 4.0f / 3.0f;
   }
 
@@ -106,6 +108,7 @@ protected:
     // Carica scena
     SC.init(this, &VD, DSL, P, "assets/models/scene.json");
     txt.init(this, &outText);
+    logo.init(this);
 
     classicAudio.load("assets/audio/classic.wav", true);
     barbieAudio.load("assets/audio/barbie.wav", true);
@@ -147,11 +150,13 @@ protected:
     P.create();
     SC.pipelinesAndDescriptorSetsInit(DSL);
     txt.pipelinesAndDescriptorSetsInit();
+    logo.pipelinesAndDescriptorSetsInit();
   }
   void pipelinesAndDescriptorSetsCleanup() {
     P.cleanup();
     SC.pipelinesAndDescriptorSetsCleanup();
     txt.pipelinesAndDescriptorSetsCleanup();
+    logo.pipelinesAndDescriptorSetsCleanup();
   }
   void localCleanup() {
     for (int i = 0; i < SC.InstanceCount; ++i)
@@ -165,10 +170,12 @@ protected:
     P.destroy();
     SC.localCleanup();
     txt.localCleanup();
+    logo.localCleanup();
   }
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
     P.bind(cb);
     SC.populateCommandBuffer(cb, currentImage, P);
+    logo.populateCommandBuffer(cb, currentImage);
     txt.populateCommandBuffer(cb, currentImage, currScene);
   }
 
@@ -213,6 +220,9 @@ protected:
         classicAudio.play();
       else if (currentBody == 1)
         barbieAudio.play();
+
+      logo.setCurrentLogo(currentBody);
+      currScene = currentBody;
 
       lastBody = currentBody;
     }
