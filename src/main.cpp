@@ -65,6 +65,9 @@ protected:
 
   std::unordered_set<int> tractorPartIdx;
   int tbIndex = -1;
+  int plowIndex = -1;
+  bool plowAttached = false;
+  glm::vec3 plowOffset = glm::vec3(0.0f);
 
   void setWindowParameters() {
     windowWidth = 800;
@@ -120,6 +123,7 @@ protected:
     tractorPartIdx.insert(SC.InstanceIds["lf"]);
     tractorPartIdx.insert(SC.InstanceIds["rf"]);
     tractorPartIdx.insert(SC.InstanceIds["p"]);
+    plowIndex = SC.InstanceIds["p"];
 
     // Pos del corpo: gestita da codice (non dal JSON)
     Pos = glm::vec3(0.0f, 3.25f, 0.0f);
@@ -262,6 +266,20 @@ protected:
           SteeringAng += STEERING_SPEED * deltaT;
         else
           SteeringAng = 0.0f;
+      }
+    }
+
+    static bool prevFire = false;
+    bool firePressed = fire && !prevFire;
+    prevFire = fire;
+
+    if (!plowAttached && firePressed) {
+      glm::vec3 plowWorldPos = glm::vec3(SC.I[plowIndex].Wm[3]);
+      if (glm::length(plowWorldPos - Pos) < 5.0f) {
+        plowAttached = true;
+        plowOffset =
+            glm::vec3(glm::rotate(glm::mat4(1.0f), -Yaw, glm::vec3(0, 1, 0)) *
+                      glm::vec4(plowWorldPos - Pos, 0.0f));
       }
     }
 
@@ -427,7 +445,13 @@ protected:
     for (const std::string &name : tractorPlow) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
-      ubo.mMat = SC.I[i].Wm * baseTr;
+      if (plowAttached) {
+        glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
+        glm::mat4 localTr = glm::translate(glm::mat4(1.0f), plowOffset);
+        ubo.mMat = bodyTr * localTr * baseTr;
+      } else {
+        ubo.mMat = SC.I[i].Wm * baseTr;
+      }
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
