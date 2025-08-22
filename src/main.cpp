@@ -225,6 +225,7 @@ protected:
 
       logo.setCurrentLogo(currentBody);
       currScene = currentBody;
+      recordCommandBuffers();
 
       lastBody = currentBody;
     }
