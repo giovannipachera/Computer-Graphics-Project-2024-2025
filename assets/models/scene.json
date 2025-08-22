@@ -5,6 +5,7 @@
 		{"id":"fw", "model":"assets/models/front_wheel.gltf",  "format":"GLTF"},
 		{"id":"bw", "model":"assets/models/back_wheel.gltf",   "format":"GLTF"},
 		{"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
+		{"id":"p", "model":"assets/models/plow.gltf", "format":"GLTF"},
 		{"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
 		{"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"}
 	],
@@ -16,7 +17,8 @@
 		{"id":"t3","texture":"assets/textures/back_wheel_texture.png"},
 		{"id":"t4","texture":"assets/textures/fender_texture.png"},
 		{"id":"t5","texture":"assets/textures/Porto.png"},
-		{"id":"t6","texture":"assets/textures/textures.png"}
+		{"id":"t6","texture":"assets/textures/textures.png"},
+		{"id":"t7","texture":"assets/textures/plow_texture.png"}
 	],
 	"instances": [
 		{ "id":"tbc",  "model":"tb",  "texture":"t0",
@@ -45,6 +47,9 @@
 
 		{ "id":"rf", "model":"f", "texture":"t4",
 			"transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
+
+		{ "id":"p", "model":"p", "texture":"t7",
+			"transform":[1,0,0,-100,  0,1,0,3,     0,0,1,0,   0,0,0,1] },
 
 		{ "id":"pln", "model":"pln", "texture":"t5",
 			"transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },

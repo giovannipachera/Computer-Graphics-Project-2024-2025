@@ -60,6 +60,7 @@ protected:
   std::vector<std::string> tractorAxes = {"ax"};
   std::vector<std::string> tractorWheels = {"flw", "frw", "blw", "brw"};
   std::vector<std::string> tractorFenders = {"lf", "rf"};
+  std::vector<std::string> tractorPlow = {"p"};
   std::vector<std::string> tractorScene = {"pln", "prm"};
 
   std::unordered_set<int> tractorPartIdx;
@@ -103,8 +104,8 @@ protected:
     SC.init(this, &VD, DSL, P, "assets/models/scene.json");
     txt.init(this, &outText);
 
-    classicAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\classic.wav", true);
-    barbieAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\barbie.wav", true);
+    classicAudio.load("assets/audio/classic.wav", true);
+    barbieAudio.load("assets/audio/barbie.wav", true);
     classicAudio.play();
     lastBody = currentBody;
 
@@ -118,6 +119,7 @@ protected:
     tractorPartIdx.insert(SC.InstanceIds["brw"]);
     tractorPartIdx.insert(SC.InstanceIds["lf"]);
     tractorPartIdx.insert(SC.InstanceIds["rf"]);
+    tractorPartIdx.insert(SC.InstanceIds["p"]);
 
     // Pos del corpo: gestita da codice (non dal JSON)
     Pos = glm::vec3(0.0f, 3.25f, 0.0f);
@@ -223,7 +225,7 @@ protected:
 
     const float STEERING_SPEED = glm::radians(30.0f);
     const float ROT_SPEED = glm::radians(120.0f);
-    const float MOVE_SPEED = 2.5f;
+    const float MOVE_SPEED = 5.5f;
 
     // Input → sterzo/velocità
     SteeringAng += -m.x * STEERING_SPEED * deltaT;
@@ -419,6 +421,17 @@ protected:
 
       SC.DS[iF]->map(currentImage, &ubo, sizeof(ubo), 0);
       SC.DS[iF]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
+    for (const std::string &name : tractorPlow) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseTr = baseFor(name);
+      ubo.mMat = SC.I[i].Wm * baseTr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
     // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
