@@ -355,13 +355,14 @@ protected:
       }
     }
 
-    if (!isColliding(newPos)) {
+    bool colliding = isColliding(newPos);
+    if (!colliding) {
       Pos = newPos;
       Yaw = newYaw;
-      wheelRoll = candidateWheelRoll;
     } else {
       dampedVel = 0.0f;
     }
+    wheelRoll = candidateWheelRoll;
 
     static bool prevFire = false;
     bool firePressed = fire && !prevFire;
