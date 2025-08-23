@@ -59,7 +59,7 @@ protected:
   AudioPlayer classicAudio;
   AudioPlayer barbieAudio;
 
-  std::vector<std::string> tractorAxes = {"axc, axb"};
+  std::vector<std::string> tractorAxes = {"axc", "axb"};
   std::vector<std::string> tractorWheels = {"flwc", "frwc", "blwc", "brwc", "flwb", "frwb", "blwb", "brwb"};
   std::vector<std::string> tractorFenders = {"lfc", "rfc", "lfb", "rfb"};
   std::vector<std::string> tractorPlow = {"p"};
@@ -356,45 +356,46 @@ protected:
     gubo.eyePos = dampedCamPos;
     gubo.eyeDir = glm::vec4(0, 0, 0, 1);
 
+    auto HideMat = [](const glm::mat4 &baseTr) {
+      return glm::translate(glm::mat4(1.0f),
+                            glm::vec3(0.0f, -10000.0f, 0.0f)) *
+             baseTr;
+    };
+
     // --- Corpo: mostra SOLO l'istanza selezionata; le altre le portiamo
     // sottoterra ---
-    {
-      // matrice "lontana" per nascondere (evitiamo scale 0 per non rompere
-      // nMat)
-      auto HideMat = [](const glm::mat4 &baseTr) {
-        return glm::translate(glm::mat4(1.0f),
-                              glm::vec3(0.0f, -10000.0f, 0.0f)) *
-               baseTr;
-      };
+    for (int k = 0; k < (int)tractorBodies.size(); ++k) {
+      const std::string &name = tractorBodies[k];
+      int i = SC.InstanceIds[name];
 
-      for (int k = 0; k < (int)tractorBodies.size(); ++k) {
-        const std::string &name = tractorBodies[k];
-        int i = SC.InstanceIds[name];
-
-        glm::mat4 baseTr = baseFor(name);
-        if (k == currentBody) {
-          // corpo visibile: segue Pos/Yaw come prima
-          ubo.mMat = MakeWorld(Pos, Yaw, 0.0f, 0.0f) * baseTr;
-        } else {
-          // corpo nascosto: lo trasliamo molto sotto
-          ubo.mMat = HideMat(baseTr);
-        }
-
-        ubo.mvpMat = ViewPrj * ubo.mMat;
-        ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
-
-        SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
-        SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+      glm::mat4 baseTr = baseFor(name);
+      if (k == currentBody) {
+        // corpo visibile: segue Pos/Yaw come prima
+        ubo.mMat = MakeWorld(Pos, Yaw, 0.0f, 0.0f) * baseTr;
+      } else {
+        // corpo nascosto: lo trasliamo molto sotto
+        ubo.mMat = HideMat(baseTr);
       }
+
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
     // Assi: solo movimento globale + offset locale. NIENTE SteeringAng.
     for (const std::string &name : tractorAxes) {
       int i = SC.InstanceIds[name];
-      glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
-      glm::mat4 localTr = glm::translate(glm::mat4(1.0f), *deltaP[i]);
       glm::mat4 baseTr = baseFor(name);
-      ubo.mMat = bodyTr * localTr * baseTr;
+      bool isBarbie = (name.back() == 'b');
+      if ((isBarbie && currentBody == 1) || (!isBarbie && currentBody == 0)) {
+        glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
+        glm::mat4 localTr = glm::translate(glm::mat4(1.0f), *deltaP[i]);
+        ubo.mMat = bodyTr * localTr * baseTr;
+      } else {
+        ubo.mMat = HideMat(baseTr);
+      }
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
@@ -411,38 +412,41 @@ protected:
     // allineare i rilievi
     for (const std::string &name : tractorWheels) {
       int i = SC.InstanceIds[name];
-
-      glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
-      glm::mat4 localTr = glm::translate(glm::mat4(1.0f), *deltaP[i]);
-
-      const bool isFront = (name == "flw" || name == "frw");
-      glm::mat4 steerTr = isFront ? glm::rotate(glm::mat4(1.0f), SteeringAng,
-                                                glm::vec3(0, 1, 0))
-                                  : glm::mat4(1.0f);
-
-      // fase per sincronizzare i rilievi
-      float phase = 0.0f;
-      if (name == "frw")
-        phase = PhaseFrontRight;
-      else if (name == "flw")
-        phase = PhaseFrontLeft;
-      else if (name == "brw")
-        phase = PhaseRearRight;
-      else if (name == "blw")
-        phase = PhaseRearLeft;
-
-      glm::mat4 rollTr =
-          glm::rotate(glm::mat4(1.0f), wheelRoll + phase, glm::vec3(1, 0, 0));
-
-      // specchio per ruote sinistre (stai usando gli asset destri)
-      glm::mat4 mirrorTr =
-          (name == "flw" || name == "blw")
-              ? glm::scale(glm::mat4(1.0f), glm::vec3(-1.0f, 1.0f, 1.0f))
-              : glm::mat4(1.0f);
-
       glm::mat4 baseTr = baseFor(name);
+      bool isBarbie = (name.back() == 'b');
+      std::string baseName = name.substr(0, name.size() - 1);
+      if ((isBarbie && currentBody == 1) || (!isBarbie && currentBody == 0)) {
+        glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
+        glm::mat4 localTr = glm::translate(glm::mat4(1.0f), *deltaP[i]);
 
-      ubo.mMat = bodyTr * localTr * steerTr * rollTr * mirrorTr * baseTr;
+        const bool isFront = (baseName == "flw" || baseName == "frw");
+        glm::mat4 steerTr =
+            isFront ? glm::rotate(glm::mat4(1.0f), SteeringAng,
+                                  glm::vec3(0, 1, 0))
+                    : glm::mat4(1.0f);
+
+        float phase = 0.0f;
+        if (baseName == "frw")
+          phase = PhaseFrontRight;
+        else if (baseName == "flw")
+          phase = PhaseFrontLeft;
+        else if (baseName == "brw")
+          phase = PhaseRearRight;
+        else if (baseName == "blw")
+          phase = PhaseRearLeft;
+
+        glm::mat4 rollTr =
+            glm::rotate(glm::mat4(1.0f), wheelRoll + phase, glm::vec3(1, 0, 0));
+
+        glm::mat4 mirrorTr =
+            (baseName == "flw" || baseName == "blw")
+                ? glm::scale(glm::mat4(1.0f), glm::vec3(-1.0f, 1.0f, 1.0f))
+                : glm::mat4(1.0f);
+
+        ubo.mMat = bodyTr * localTr * steerTr * rollTr * mirrorTr * baseTr;
+      } else {
+        ubo.mMat = HideMat(baseTr);
+      }
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
 
@@ -453,24 +457,29 @@ protected:
     // Parafanghi: sterzano attorno al centro RUOTA (nessun roll)
     for (const std::string &name : tractorFenders) {
       int iF = SC.InstanceIds[name];
-
-      // ruota abbinata: lf → flw, rf → frw
-      const std::string wheelName = (name == "lf") ? "flw" : "frw";
-      int iW = SC.InstanceIds[wheelName];
-
-      glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
-      glm::vec3 wheelP = *deltaP[iW]; // pivot = posizione ruota dal JSON
-      glm::vec3 fendOff =
-          *deltaP[iF] - wheelP; // offset parafango rispetto alla ruota
-
-      glm::mat4 toWheel = glm::translate(glm::mat4(1.0f), wheelP);
-      glm::mat4 steerTr =
-          glm::rotate(glm::mat4(1.0f), SteeringAng, glm::vec3(0, 1, 0));
-      glm::mat4 fromWheel = glm::translate(glm::mat4(1.0f), fendOff);
-
       glm::mat4 baseTr = baseFor(name);
+      bool isBarbie = (name.back() == 'b');
+      std::string baseName = name.substr(0, name.size() - 1);
+      if ((isBarbie && currentBody == 1) || (!isBarbie && currentBody == 0)) {
+        std::string suffix(1, name.back());
+        const std::string wheelName =
+            (baseName == "lf") ? "flw" + suffix : "frw" + suffix;
+        int iW = SC.InstanceIds[wheelName];
 
-      ubo.mMat = bodyTr * toWheel * steerTr * fromWheel * baseTr;
+        glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
+        glm::vec3 wheelP = *deltaP[iW]; // pivot = posizione ruota dal JSON
+        glm::vec3 fendOff =
+            *deltaP[iF] - wheelP; // offset parafango rispetto alla ruota
+
+        glm::mat4 toWheel = glm::translate(glm::mat4(1.0f), wheelP);
+        glm::mat4 steerTr =
+            glm::rotate(glm::mat4(1.0f), SteeringAng, glm::vec3(0, 1, 0));
+        glm::mat4 fromWheel = glm::translate(glm::mat4(1.0f), fendOff);
+
+        ubo.mMat = bodyTr * toWheel * steerTr * fromWheel * baseTr;
+      } else {
+        ubo.mMat = HideMat(baseTr);
+      }
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
 
