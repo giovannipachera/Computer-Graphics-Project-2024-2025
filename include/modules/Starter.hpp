@@ -1781,23 +1781,26 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 
 
 	// Control Wrapper
-	void handleGamePad(int id,  glm::vec3 &m, glm::vec3 &r, bool &fire) {
+	void handleGamePad(int id,  glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn) {
 		const float deadZone = 0.1f;
 
 		if(glfwJoystickIsGamepad(id)) {
 			GLFWgamepadstate state;
 			if (glfwGetGamepadState(id, &state)) {
 				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]) > deadZone) {
-					m.x += state.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
-				}
-				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]) > deadZone) {
-					m.z += state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
+					m.x += 0.8f*state.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
 				}
 				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]) > deadZone) {
-					m.y -= state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER];
+					m.z += 0.8f*state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER];
 				}
 				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]) > deadZone) {
-					m.y += state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER];
+					m.z -= 0.8f*state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER];
+				}
+				if(state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]  == GLFW_PRESS) {
+					m.y -= 1.0f;
+				}
+				if(state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]  == GLFW_PRESS) {
+					m.y += 1.0f;
 				}
 
 				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > deadZone) {
@@ -1806,14 +1809,18 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 				if(fabs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > deadZone) {
 					r.x += state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
 				}
-				r.z += state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] ? 1.0f : 0.0f;
-				r.z -= state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] ? 1.0f : 0.0f;
-				fire = fire | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_A] | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_B];
+				// r.z += state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] ? 1.0f : 0.0f;
+				// r.z -= state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] ? 1.0f : 0.0f;
+
+				horn = horn | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_TRIANGLE];
+				prev = prev | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_SQUARE];
+				next = next | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_CIRCLE];
+				fire = fire | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_CROSS];
 			}
 		}
 	}
 
-	void getSixAxis(float &deltaT, glm::vec3 &m, glm::vec3 &r, bool &fire) {
+	void getSixAxis(float &deltaT, glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn) {
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		static float lastTime = 0.0f;
 
@@ -1844,10 +1851,10 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 			r.y = 1.0f;
 		}
 		if(glfwGetKey(window, GLFW_KEY_UP)) {
-			r.x = -1.0f;
+			r.x = 1.0f;
 		}
 		if(glfwGetKey(window, GLFW_KEY_DOWN)) {
-			r.x = 1.0f;
+			r.x = -1.0f;
 		}
 		if(glfwGetKey(window, GLFW_KEY_Q)) {
 			r.z = 1.0f;
@@ -1855,7 +1862,6 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 		if(glfwGetKey(window, GLFW_KEY_E)) {
 			r.z = -1.0f;
 		}
-
 		if(glfwGetKey(window, GLFW_KEY_A)) {
 			m.x = -1.0f;
 		}
@@ -1875,11 +1881,14 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 			m.y = -1.0f;
 		}
 
+    	horn = glfwGetKey(window, GLFW_KEY_K);
+		next = glfwGetKey(window, GLFW_KEY_P);
+    	prev = glfwGetKey(window, GLFW_KEY_O);
 		fire = glfwGetKey(window, GLFW_KEY_SPACE) | (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
-		handleGamePad(GLFW_JOYSTICK_1,m,r,fire);
-		handleGamePad(GLFW_JOYSTICK_2,m,r,fire);
-		handleGamePad(GLFW_JOYSTICK_3,m,r,fire);
-		handleGamePad(GLFW_JOYSTICK_4,m,r,fire);
+		handleGamePad(GLFW_JOYSTICK_1,m,r,fire, next, prev, horn);
+		handleGamePad(GLFW_JOYSTICK_2,m,r,fire, next, prev, horn);
+		handleGamePad(GLFW_JOYSTICK_3,m,r,fire, next, prev, horn);
+		handleGamePad(GLFW_JOYSTICK_4,m,r,fire, next, prev, horn);
 	}
 
 	// Public part of the base class

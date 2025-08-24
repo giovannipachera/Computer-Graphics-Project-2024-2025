@@ -59,6 +59,7 @@ protected:
 
   AudioPlayer classicAudio;
   AudioPlayer barbieAudio;
+  AudioPlayer hornAudio;
 
   std::vector<std::string> tractorAxes = {"axc", "axb"};
   std::vector<std::string> tractorWheels = {"flwc", "frwc", "blwc", "brwc", "flwb", "frwb", "blwb", "brwb"};
@@ -111,8 +112,16 @@ protected:
     txt.init(this, &outText);
     logo.init(this);
 
+    #ifdef _WIN32
+    classicAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\classic.wav", true);
+    barbieAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\barbie.wav", true);
+    hornAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\horn.wav", true);
+    #else
     classicAudio.load("assets/audio/classic.wav", true);
     barbieAudio.load("assets/audio/barbie.wav", true);
+    hornAudio.load("assets/audio/horn.wav", true);
+    #endif
+
     classicAudio.play();
     lastBody = currentBody;
 
@@ -174,6 +183,7 @@ protected:
     free(usePitch);
     classicAudio.stop(true);
     barbieAudio.stop(true);
+    hornAudio.stop(true);
     DSL.cleanup();
     P.destroy();
     SC.localCleanup();
@@ -218,29 +228,39 @@ protected:
   void updateUniformBuffer(uint32_t currentImage) {
     float deltaT;
     glm::vec3 m(0), r(0);
-    bool fire = false;
-    getSixAxis(deltaT, m, r, fire);
+    bool fire = false, next = false, prev = false, horn = false;
+    getSixAxis(deltaT, m, r, fire, next, prev, horn);
 
     // Clamp del timestep per stabilità
     const float MAX_DELTA_T = 0.05f;
     if (deltaT > MAX_DELTA_T)
       deltaT = MAX_DELTA_T;
 
-    // --- gestione input O/P per switch corpo ---
-    static int prevP = GLFW_RELEASE, prevO = GLFW_RELEASE;
-    int curP = glfwGetKey(window, GLFW_KEY_P);
-    int curO = glfwGetKey(window, GLFW_KEY_O);
+    static bool prevP = false;
+    bool pPressed = next && !prevP;
+    prevP = next;
 
-    if (curP == GLFW_PRESS && prevP == GLFW_RELEASE) {
+    if (pPressed) {
       currentBody = (currentBody + 1) % (int)tractorBodies.size();
     }
-    if (curO == GLFW_PRESS && prevO == GLFW_RELEASE) {
+
+    static bool prevO = false;
+    bool oPressed = prev && !prevO;
+    prevO = prev;
+
+    if (oPressed) {
       currentBody = (currentBody - 1 + (int)tractorBodies.size()) %
                     (int)tractorBodies.size();
     }
 
-    prevP = curP;
-    prevO = curO;
+    static bool prevK = false;
+    bool kPressed = horn && !prevK;
+    prevK = horn;
+
+    if (kPressed) {
+      hornAudio.play();
+      hornAudio.stop(false);
+    }
 
     if (currentBody != lastBody) {
       if (lastBody == 0)
@@ -259,6 +279,7 @@ protected:
 
       lastBody = currentBody;
     }
+
 
     // Stato veicolo semplificato (invariato)
     static float SteeringAng = 0.0f;
@@ -338,17 +359,9 @@ protected:
     const float MIN_DIST    = 8.0f;
     const float MAX_DIST    = 35.0f;
 
-    // Input tastiera per orbitare / zoomare
-    if (glfwGetKey(window, GLFW_KEY_LEFT)  == GLFW_PRESS) camAz += ORBIT_SPEED * deltaT;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) camAz -= ORBIT_SPEED * deltaT;
-    if (glfwGetKey(window, GLFW_KEY_DOWN)    == GLFW_PRESS) camEl  = glm::clamp(camEl + ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
-    if (glfwGetKey(window, GLFW_KEY_UP)  == GLFW_PRESS) camEl  = glm::clamp(camEl - ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
-    if (glfwGetKey(window, GLFW_KEY_R)     == GLFW_PRESS) camDist = glm::clamp(camDist - ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-in
-    if (glfwGetKey(window, GLFW_KEY_F)     == GLFW_PRESS) camDist = glm::clamp(camDist + ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-out
-
-    // Input stick destro (PlayStation): r.x = su/giù (elevazione), r.y = sinistra/destra (azimuth)
-    camAz -= r.y * ORBIT_SPEED * deltaT;
-    camEl  = glm::clamp(camEl + r.x * ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
+    camDist = glm::clamp(camDist - 0.2f * m.y * ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST);
+    camAz -= 0.5*(r.y * ORBIT_SPEED * deltaT);
+    camEl  = glm::clamp(camEl + 0.5f*(r.x * ORBIT_SPEED * deltaT), glm::radians(5.0f), glm::radians(80.0f));
 
     // Punto che vogliamo guardare (leggermente sopra il corpo)
     glm::vec3 CamTarget = Pos + glm::vec3(0, 2, 0);
