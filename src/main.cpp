@@ -31,6 +31,7 @@ struct Vertex {
 #include "WVP.hpp"
 #include "modules/Scene.hpp"
 #include <unordered_set>
+#include <cmath>
 
 class SIMULATOR : public BaseProject {
 protected:
@@ -220,6 +221,12 @@ protected:
     bool fire = false;
     getSixAxis(deltaT, m, r, fire);
 
+    // Avoid physics explosions when the frame time spikes by clamping
+    // the simulation step to a reasonable maximum.
+    const float MAX_DELTA_T = 0.05f;
+    if (deltaT > MAX_DELTA_T)
+      deltaT = MAX_DELTA_T;
+
     // --- gestione input O/P per switch corpo ---
     static int prevP = GLFW_RELEASE, prevO = GLFW_RELEASE;
     int curP = glfwGetKey(window, GLFW_KEY_P);
@@ -258,6 +265,10 @@ protected:
     static float CamYaw = M_PI;
     static float CamDist = 10.0f;
     static float CamRoll = 0.0f;
+    // Smoothed camera orientation to avoid jitter when starting to rotate
+    static float dampedCamYaw = CamYaw;
+    static float dampedCamPitch = CamPitch;
+    static float dampedCamRoll = CamRoll;
     const glm::vec3 CamTargetDelta = glm::vec3(0, 2, 0);
 
     static float SteeringAng = 0.0f;
@@ -326,18 +337,27 @@ protected:
     CamRoll -= ROT_SPEED * deltaT * r.z;
     CamDist -= MOVE_SPEED * deltaT * m.y;
 
-    CamYaw = glm::clamp(CamYaw, 0.0f, 2.0f * float(M_PI));
+    CamYaw = fmod(CamYaw, 2.0f * float(M_PI));
+    if (CamYaw < 0.0f)
+      CamYaw += 2.0f * float(M_PI);
     CamPitch = glm::clamp(CamPitch, 0.0f, float(M_PI_2) - 0.01f);
     CamRoll = glm::clamp(CamRoll, float(-M_PI), float(M_PI));
     CamDist = glm::clamp(CamDist, 7.0f, 15.0f);
+
+    // Smooth camera rotation similar to position damping
+    const float lambdaRot = 10.0f;
+    float rotAlpha = 1.0f - exp(-lambdaRot * deltaT);
+    dampedCamYaw += (CamYaw - dampedCamYaw) * rotAlpha;
+    dampedCamPitch += (CamPitch - dampedCamPitch) * rotAlpha;
+    dampedCamRoll += (CamRoll - dampedCamRoll) * rotAlpha;
 
     glm::vec3 CamTarget =
         Pos + glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0, 1, 0)) *
                         glm::vec4(CamTargetDelta, 1));
     glm::vec3 CamPos =
         CamTarget +
-        glm::vec3(glm::rotate(glm::mat4(1), Yaw + CamYaw, glm::vec3(0, 1, 0)) *
-                  glm::rotate(glm::mat4(1), -CamPitch, glm::vec3(1, 0, 0)) *
+        glm::vec3(glm::rotate(glm::mat4(1), Yaw + dampedCamYaw, glm::vec3(0, 1, 0)) *
+                  glm::rotate(glm::mat4(1), -dampedCamPitch, glm::vec3(1, 0, 0)) *
                   glm::vec4(0, 0, CamDist, 1));
 
     static glm::vec3 dampedCamPos = CamPos;
@@ -345,7 +365,7 @@ protected:
     dampedCamPos = CamPos * (1 - exp(-lambdaCam * deltaT)) +
                    dampedCamPos * exp(-lambdaCam * deltaT);
     glm::mat4 ViewPrj = MakeViewProjectionLookAt(
-        dampedCamPos, CamTarget, glm::vec3(0, 1, 0), CamRoll,
+        dampedCamPos, CamTarget, glm::vec3(0, 1, 0), dampedCamRoll,
         glm::radians(90.0f), Ar, 0.1f, 500.0f);
 
     UniformBufferObject ubo{};
