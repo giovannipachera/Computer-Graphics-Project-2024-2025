@@ -331,7 +331,7 @@ protected:
     // =========================
     static float camDist = 13.0f;                          // distanza iniziale un po' maggiore
     static float camEl   = glm::radians(25.0f);            // elevazione rispetto all'orizzontale
-    static float camAz   = 0.0f;
+    static float camAz   = glm::pi<float>();
 
     const float ORBIT_SPEED = glm::radians(90.0f);         // deg/s
     const float ZOOM_SPEED  = 18.0f;                       // unità/s
@@ -341,8 +341,8 @@ protected:
     // Input tastiera per orbitare / zoomare
     if (glfwGetKey(window, GLFW_KEY_LEFT)  == GLFW_PRESS) camAz += ORBIT_SPEED * deltaT;
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) camAz -= ORBIT_SPEED * deltaT;
-    if (glfwGetKey(window, GLFW_KEY_UP)    == GLFW_PRESS) camEl  = glm::clamp(camEl + ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
-    if (glfwGetKey(window, GLFW_KEY_DOWN)  == GLFW_PRESS) camEl  = glm::clamp(camEl - ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
+    if (glfwGetKey(window, GLFW_KEY_DOWN)    == GLFW_PRESS) camEl  = glm::clamp(camEl + ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
+    if (glfwGetKey(window, GLFW_KEY_UP)  == GLFW_PRESS) camEl  = glm::clamp(camEl - ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
     if (glfwGetKey(window, GLFW_KEY_R)     == GLFW_PRESS) camDist = glm::clamp(camDist - ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-in
     if (glfwGetKey(window, GLFW_KEY_F)     == GLFW_PRESS) camDist = glm::clamp(camDist + ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-out
 
