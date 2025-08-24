@@ -331,22 +331,19 @@ protected:
     // =========================
     static float camDist = 13.0f;                          // distanza iniziale un po' maggiore
     static float camEl   = glm::radians(25.0f);            // elevazione rispetto all'orizzontale
-    static float camAz   = 0.0f;
+    static float camAz   = glm::pi<float>();               // camera dietro il trattore
 
     const float ORBIT_SPEED = glm::radians(90.0f);         // deg/s
     const float ZOOM_SPEED  = 18.0f;                       // unità/s
     const float MIN_DIST    = 8.0f;
     const float MAX_DIST    = 35.0f;
 
-    // Input tastiera per orbitare / zoomare
-    if (glfwGetKey(window, GLFW_KEY_LEFT)  == GLFW_PRESS) camAz += ORBIT_SPEED * deltaT;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) camAz -= ORBIT_SPEED * deltaT;
-    if (glfwGetKey(window, GLFW_KEY_UP)    == GLFW_PRESS) camEl  = glm::clamp(camEl + ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
-    if (glfwGetKey(window, GLFW_KEY_DOWN)  == GLFW_PRESS) camEl  = glm::clamp(camEl - ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
-    if (glfwGetKey(window, GLFW_KEY_R)     == GLFW_PRESS) camDist = glm::clamp(camDist - ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-in
-    if (glfwGetKey(window, GLFW_KEY_F)     == GLFW_PRESS) camDist = glm::clamp(camDist + ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-out
+    float zoomInput = m.y;
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) zoomInput -= 1.0f; // zoom-in
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) zoomInput += 1.0f; // zoom-out
+    camDist = glm::clamp(camDist + zoomInput * ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST);
 
-    // Input stick destro (PlayStation): r.x = su/giù (elevazione), r.y = sinistra/destra (azimuth)
+    // Input di orbitazione: frecce tastiera e stick destro (PS)
     camAz -= r.y * ORBIT_SPEED * deltaT;
     camEl  = glm::clamp(camEl + r.x * ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
 
