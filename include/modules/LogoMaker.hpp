@@ -49,7 +49,7 @@ struct LogoMaker {
         float PtoTdy = -0.95f;
         float PtoTsx = 2.0f / 800.0f;
         float PtoTsy = 2.0f / 600.0f;
-        float w = 150.0f;
+        float w = 160.0f;
         float h = 150.0f;
 
         int stride = VD.Bindings[0].stride;

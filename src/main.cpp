@@ -78,9 +78,9 @@ protected:
     windowTitle = "Hey buddy, are you a real country boy?";
     windowResizable = GLFW_TRUE;
     initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f};
-    uniformBlocksInPool = 19 * 2 + 2;
-    texturesInPool = 19 + 3;
-    setsInPool = 19 + 3;
+    uniformBlocksInPool = 64;
+    texturesInPool = 64;
+    setsInPool = 64;
     Ar = 4.0f / 3.0f;
   }
 
@@ -221,8 +221,7 @@ protected:
     bool fire = false;
     getSixAxis(deltaT, m, r, fire);
 
-    // Avoid physics explosions when the frame time spikes by clamping
-    // the simulation step to a reasonable maximum.
+    // Clamp del timestep per stabilità
     const float MAX_DELTA_T = 0.05f;
     if (deltaT > MAX_DELTA_T)
       deltaT = MAX_DELTA_T;
@@ -261,22 +260,12 @@ protected:
       lastBody = currentBody;
     }
 
-    static float CamPitch = glm::radians(20.0f);
-    static float CamYaw = M_PI;
-    static float CamDist = 10.0f;
-    static float CamRoll = 0.0f;
-    // Smoothed camera orientation to avoid jitter when starting to rotate
-    static float dampedCamYaw = CamYaw;
-    static float dampedCamPitch = CamPitch;
-    static float dampedCamRoll = CamRoll;
-    const glm::vec3 CamTargetDelta = glm::vec3(0, 2, 0);
-
+    // Stato veicolo semplificato (invariato)
     static float SteeringAng = 0.0f;
     static float wheelRoll = 0.0f;
     static float dampedVel = 0.0f;
 
     const float STEERING_SPEED = glm::radians(30.0f);
-    const float ROT_SPEED = glm::radians(120.0f);
     const float MOVE_SPEED = 5.5f;
 
     // Input → sterzo/velocità
@@ -317,6 +306,7 @@ protected:
       }
     }
 
+    // Attacca strozapaglia (plow) quando vicino e premi "fire"
     static bool prevFire = false;
     bool firePressed = fire && !prevFire;
     prevFire = fire;
@@ -331,50 +321,65 @@ protected:
       }
     }
 
-    // Camera
-    CamYaw += ROT_SPEED * deltaT * r.y;
-    CamPitch -= ROT_SPEED * deltaT * r.x;
-    CamRoll -= ROT_SPEED * deltaT * r.z;
-    CamDist -= MOVE_SPEED * deltaT * m.y;
+    // =========================
+    //   CAMERA ORBITALE (Frecce + Right Stick PS)
+    //   - ←/→: ruota attorno al trattore (azimuth)
+    //   - ↑/↓: alza/abbassa l'elevazione
+    //   - R/F : zoom in / zoom out
+    //   - Right Stick (PS): stessa logica delle frecce (r.x -> elevazione, r.y -> azimuth)
+    //   Nota: nessuno smoothing, nessun roll
+    // =========================
+    static float camDist = 13.0f;                          // distanza iniziale un po' maggiore
+    static float camEl   = glm::radians(25.0f);            // elevazione rispetto all'orizzontale
+    static float camAz   = 0.0f;
 
-    CamYaw = fmod(CamYaw, 2.0f * float(M_PI));
-    if (CamYaw < 0.0f)
-      CamYaw += 2.0f * float(M_PI);
-    CamPitch = glm::clamp(CamPitch, 0.0f, float(M_PI_2) - 0.01f);
-    CamRoll = glm::clamp(CamRoll, float(-M_PI), float(M_PI));
-    CamDist = glm::clamp(CamDist, 7.0f, 15.0f);
+    const float ORBIT_SPEED = glm::radians(90.0f);         // deg/s
+    const float ZOOM_SPEED  = 18.0f;                       // unità/s
+    const float MIN_DIST    = 8.0f;
+    const float MAX_DIST    = 35.0f;
 
-    // Smooth camera rotation similar to position damping
-    const float lambdaRot = 10.0f;
-    float rotAlpha = 1.0f - exp(-lambdaRot * deltaT);
-    dampedCamYaw += (CamYaw - dampedCamYaw) * rotAlpha;
-    dampedCamPitch += (CamPitch - dampedCamPitch) * rotAlpha;
-    dampedCamRoll += (CamRoll - dampedCamRoll) * rotAlpha;
+    // Input tastiera per orbitare / zoomare
+    if (glfwGetKey(window, GLFW_KEY_LEFT)  == GLFW_PRESS) camAz += ORBIT_SPEED * deltaT;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) camAz -= ORBIT_SPEED * deltaT;
+    if (glfwGetKey(window, GLFW_KEY_UP)    == GLFW_PRESS) camEl  = glm::clamp(camEl + ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
+    if (glfwGetKey(window, GLFW_KEY_DOWN)  == GLFW_PRESS) camEl  = glm::clamp(camEl - ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
+    if (glfwGetKey(window, GLFW_KEY_R)     == GLFW_PRESS) camDist = glm::clamp(camDist - ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-in
+    if (glfwGetKey(window, GLFW_KEY_F)     == GLFW_PRESS) camDist = glm::clamp(camDist + ZOOM_SPEED * deltaT, MIN_DIST, MAX_DIST); // zoom-out
 
-    glm::vec3 CamTarget =
-        Pos + glm::vec3(glm::rotate(glm::mat4(1), Yaw, glm::vec3(0, 1, 0)) *
-                        glm::vec4(CamTargetDelta, 1));
-    glm::vec3 CamPos =
-        CamTarget +
-        glm::vec3(glm::rotate(glm::mat4(1), Yaw + dampedCamYaw, glm::vec3(0, 1, 0)) *
-                  glm::rotate(glm::mat4(1), -dampedCamPitch, glm::vec3(1, 0, 0)) *
-                  glm::vec4(0, 0, CamDist, 1));
+    // Input stick destro (PlayStation): r.x = su/giù (elevazione), r.y = sinistra/destra (azimuth)
+    camAz -= r.y * ORBIT_SPEED * deltaT;
+    camEl  = glm::clamp(camEl + r.x * ORBIT_SPEED * deltaT, glm::radians(5.0f), glm::radians(80.0f));
 
-    static glm::vec3 dampedCamPos = CamPos;
-    const float lambdaCam = 10.0f;
-    dampedCamPos = CamPos * (1 - exp(-lambdaCam * deltaT)) +
-                   dampedCamPos * exp(-lambdaCam * deltaT);
+    // Punto che vogliamo guardare (leggermente sopra il corpo)
+    glm::vec3 CamTarget = Pos + glm::vec3(0, 2, 0);
+
+    // Offset camera in sistema locale del trattore (sferico: distanza + elevazione + azimuth)
+    glm::mat4 yawRot   = glm::rotate(glm::mat4(1.0f), Yaw + camAz, glm::vec3(0, 1, 0));
+    glm::mat4 pitchRot = glm::rotate(glm::mat4(1.0f), -camEl,       glm::vec3(1, 0, 0));
+    glm::vec3 camOff   = glm::vec3(yawRot * pitchRot * glm::vec4(0, 0, camDist, 1));
+
+    glm::vec3 CamPos = CamTarget + camOff;
+
+    // View-Projection senza roll e senza smoothing
     glm::mat4 ViewPrj = MakeViewProjectionLookAt(
-        dampedCamPos, CamTarget, glm::vec3(0, 1, 0), dampedCamRoll,
-        glm::radians(90.0f), Ar, 0.1f, 500.0f);
+        CamPos,                // posizione camera
+        CamTarget,             // punto guardato
+        glm::vec3(0, 1, 0),    // up
+        0.0f,                  // roll eliminato
+        glm::radians(70.0f),   // FOV più naturale
+        Ar,
+        0.1f,
+        500.0f);
 
-    UniformBufferObject ubo{};
+    // Global UBO
     GlobalUniformBufferObject gubo{};
     gubo.lightDir =
         glm::vec3(cos(glm::radians(135.0f)), sin(glm::radians(135.0f)), 0.0f);
     gubo.lightColor = glm::vec4(1.0f);
-    gubo.eyePos = dampedCamPos;
+    gubo.eyePos = CamPos;
     gubo.eyeDir = glm::vec4(0, 0, 0, 1);
+
+    UniformBufferObject ubo{};
 
     auto HideMat = [](const glm::mat4 &baseTr) {
       return glm::translate(glm::mat4(1.0f),
@@ -382,8 +387,7 @@ protected:
              baseTr;
     };
 
-    // --- Corpo: mostra SOLO l'istanza selezionata; le altre le portiamo
-    // sottoterra ---
+    // --- Corpo: mostra SOLO l'istanza selezionata; le altre le portiamo sottoterra ---
     for (int k = 0; k < (int)tractorBodies.size(); ++k) {
       const std::string &name = tractorBodies[k];
       int i = SC.InstanceIds[name];
@@ -422,14 +426,13 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // --- Allineamento tasselli: fase iniziale di ciascuna ruota (tweak) ---
+    // --- Allineamento tasselli (fase iniziale ruote)
     static float PhaseFrontRight = 0.0f;               // riferimento
-    static float PhaseFrontLeft = glm::radians(20.0f); // regola 10–25°
+    static float PhaseFrontLeft = glm::radians(20.0f); // tweak
     static float PhaseRearRight = 0.0f;                // riferimento
-    static float PhaseRearLeft = glm::radians(20.0f);  // regola 10–25°
+    static float PhaseRearLeft = glm::radians(20.0f);  // tweak
 
-    // Ruote: anteriori sterzano, tutte rotolano; sinistre specchiate; fase per
-    // allineare i rilievi
+    // Ruote
     for (const std::string &name : tractorWheels) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -507,7 +510,7 @@ protected:
       SC.DS[iF]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
+    // Aratro (plow) e scena
     for (const std::string &name : tractorPlow) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -524,7 +527,6 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // Scenario: pln (OBJ → identity), prm (GLTF → Rx(+90°))
     for (const std::string &name : tractorScene) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -547,3 +549,4 @@ int main() {
   }
   return EXIT_SUCCESS;
 }
+

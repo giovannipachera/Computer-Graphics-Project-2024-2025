@@ -7,7 +7,8 @@
 		{"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
 		{"id":"p", "model":"assets/models/plow.gltf", "format":"GLTF"},
 		{"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
-		{"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"}
+		{"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"},
+		{"id":"c", "model":"assets/models/corn_field.gltf", "format":"GLTF"}
 	],
 	"textures": [
 		{"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -23,7 +24,8 @@
 		{"id":"t10","texture":"assets/textures/front_wheel_barbie_texture.png"},
 		{"id":"t11","texture":"assets/textures/back_wheel_barbie_texture.png"},
 		{"id":"t12","texture":"assets/textures/back_wheel_barbie_texture.png"},
-		{"id":"t13","texture":"assets/textures/fender_barbie_texture.png"}
+		{"id":"t13","texture":"assets/textures/fender_barbie_texture.png"},
+		{"id":"t14","texture":"assets/textures/corn_texture.png"}
 	],
 	"instances": [
 		{ "id":"tbc",  "model":"tb",  "texture":"t0",
@@ -81,6 +83,9 @@
 			"transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
 
 		{ "id":"prm", "model":"prm", "texture":"t6",
-			"transform":[ 1,0,0,0,  0,-1,0,25,  0,0,1,0,  0,0,0,1 ] }
+			"transform":[ 1,0,0,0,  0,-1,0,25,  0,0,1,0,  0,0,0,1 ] },
+
+		{ "id":"c", "model":"c", "texture":"t14",
+			"transform":[ 10,0,0,0,  0,10,0,0,  0,0,10,0,  0,0,0,1 ] }
 	]
 }
