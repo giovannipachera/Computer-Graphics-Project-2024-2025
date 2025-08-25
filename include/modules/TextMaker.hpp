@@ -1,9 +1,12 @@
 
+#include <string>
+#include <algorithm>
+
 struct SingleText {
-	int usedLines;
-	const char *l[4];
-	int start;
-	int len;
+        int usedLines;
+        std::string l[4];
+        int start;
+        int len;
 };
 
 	const float VisV[] = {1.0,0.0,0.0,2.0,0.0,1.0,0.0,-1.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.707,-0.707,0.0,0.0,0.707,0.707,0.0,0.0,0.0,0.0,1.0,0.5,0.0,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,1.0,0.5,0.0,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,1.0,-1.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0};
@@ -97,109 +100,113 @@ struct TextMaker {
 	}
 
 
-	void createTextMesh() {
-		int totLen = 0;
-		for(auto& Txt : *Texts) {
-			for(int i = 0; i < Txt.usedLines; i++) {
-				totLen += strlen(Txt.l[i]);
-			}
-		}
-		std::cout << "Total characters: " << totLen << "\n";
+        void createTextMesh() {
+                int totLen = 0;
+                for (auto &Txt : *Texts) {
+                        for (int i = 0; i < Txt.usedLines; i++) {
+                                totLen += static_cast<int>(Txt.l[i].size());
+                        }
+                }
+                std::cout << "Total characters: " << totLen << "\n";
 
-		M.indices.resize(6 * totLen);
+                M.indices.resize(6 * totLen);
 
-		int FontId = 1;
+                int FontId = 2;
 
                 float PtoTdx = -0.95;
-                float PtoTdy = -0.75;
-                float PtoTsx = 2.0/800.0;
-                float PtoTsy = 2.0/600.0;
+                float PtoTdy = 0.85f;
+                float PtoTsx = 2.0 / 800.0;
+                float PtoTsy = 2.0 / 600.0;
 
-		int minChar = 32;
-		int maxChar = 127;
-		int texW = 1024;
-		int texH = 512;
+                int minChar = 32;
+                int maxChar = 127;
+                int texW = 1024;
+                int texH = 512;
 
-		int tpx = 0;
-		int tpy = 0;
+                int tpx = 0;
+                int tpy = 0;
 
-		int ib = 0, k = 0;
-		for(auto& Txt : *Texts) {
-			Txt.start = ib;
-			for(int i = 0; i < Txt.usedLines; i++) {
-				for(int j = 0; j < strlen(Txt.l[i]); j++) {
-					int c = ((int)Txt.l[i][j]) - minChar;
-					if((c >= 0) && (c <= maxChar)) {
-//std::cout << k << " " << j << " " << i << " " << ib << " " << c << "\n";
-						CharData d = Fonts[FontId].P[c];
+                int ib = 0, k = 0;
+                for (auto &Txt : *Texts) {
+                        Txt.start = ib;
+                        for (int i = 0; i < Txt.usedLines; i++) {
+                                for (int j = 0; j < static_cast<int>(Txt.l[i].size()); j++) {
+                                        int c = ((int)Txt.l[i][j]) - minChar;
+                                        if ((c >= 0) && (c <= maxChar)) {
+                                                CharData d = Fonts[FontId].P[c];
 
-						int mainStride = VD.Bindings[0].stride;
-						std::vector<unsigned char> vertex(mainStride, 0);
-						TextVertex *V_vertex = (TextVertex *)(&vertex[0]);
+                                                int mainStride = VD.Bindings[0].stride;
+                                                std::vector<unsigned char> vertex(mainStride, 0);
+                                                TextVertex *V_vertex = (TextVertex *)(&vertex[0]);
 
-						V_vertex->pos = {
-							(float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
-							(float)(tpy + d.yoffset) * PtoTsy + PtoTdy
-						};
-						V_vertex->texCoord = {
-							(float)d.x / texW,
-							(float)d.y / texH
-						};
-						M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
-						// M.vertices.push_back(vertex);
+                                                V_vertex->pos = {
+                                                        (float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
+                                                        (float)(tpy + d.yoffset) * PtoTsy + PtoTdy};
+                                                V_vertex->texCoord = {(float)d.x / texW,
+                                                                       (float)d.y / texH};
+                                                M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
 
-						V_vertex->pos = {
-							(float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
-							(float)(float)(tpy + d.yoffset) * PtoTsy + PtoTdy
-						};
-						V_vertex->texCoord = {
-							(float)(float)(d.x + d.width) / texW,
-							(float)d.y / texH
-						};
-						M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+                                                V_vertex->pos = {
+                                                        (float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
+                                                        (float)(tpy + d.yoffset) * PtoTsy + PtoTdy};
+                                                V_vertex->texCoord = {
+                                                        (float)(d.x + d.width) / texW,
+                                                        (float)d.y / texH};
+                                                M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
 
-						V_vertex->pos = {
-							(float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
-							(float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy
-						};
-						V_vertex->texCoord = {
-							(float)(d.x ) / texW,
-							(float)(d.y + d.height) / texH
-						};
-						M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+                                                V_vertex->pos = {
+                                                        (float)(tpx + d.xoffset) * PtoTsx + PtoTdx,
+                                                        (float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy};
+                                                V_vertex->texCoord = {(float)(d.x) / texW,
+                                                                       (float)(d.y + d.height) / texH};
+                                                M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
 
-						V_vertex->pos = {
-							(float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
-							(float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy
-						};
-						V_vertex->texCoord = {
-							(float)(d.x + d.width) / texW,
-							(float)(d.y + d.height) / texH
-						};
-						M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
+                                                V_vertex->pos = {
+                                                        (float)(tpx + d.xoffset + d.width) * PtoTsx + PtoTdx,
+                                                        (float)(tpy + d.yoffset + d.height) * PtoTsy + PtoTdy};
+                                                V_vertex->texCoord = {
+                                                        (float)(d.x + d.width) / texW,
+                                                        (float)(d.y + d.height) / texH};
+                                                M.vertices.insert(M.vertices.end(), vertex.begin(), vertex.end());
 
-						M.indices[ib + 0] = 4 * k + 0;
-						M.indices[ib + 1] = 4 * k + 1;
-						M.indices[ib + 2] = 4 * k + 2;
-						M.indices[ib + 3] = 4 * k + 1;
-						M.indices[ib + 4] = 4 * k + 2;
-						M.indices[ib + 5] = 4 * k + 3;
+                                                M.indices[ib + 0] = 4 * k + 0;
+                                                M.indices[ib + 1] = 4 * k + 1;
+                                                M.indices[ib + 2] = 4 * k + 2;
+                                                M.indices[ib + 3] = 4 * k + 1;
+                                                M.indices[ib + 4] = 4 * k + 2;
+                                                M.indices[ib + 5] = 4 * k + 3;
 
-						ib += 6;
-						tpx += d.xadvance;
-						k++;
-					}
-				}
-				tpy += Fonts[FontId].lineHeight;
-				tpx = 0;
-			}
-			tpx = 0;
-			tpy = 0;
-			Txt.len = ib - Txt.start;
-		}
-		std::cout << "Text: " << M.vertices.size()
-				  << ", I: " << M.indices.size() << "\n";
-	}
+                                                ib += 6;
+                                                tpx += d.xadvance;
+                                                k++;
+                                        }
+                                }
+                                tpy -= Fonts[FontId].lineHeight;
+                                tpx = 0;
+                        }
+                        tpx = 0;
+                        tpy = 0;
+                        Txt.len = ib - Txt.start;
+                }
+                std::cout << "Text: " << M.vertices.size() << ", I: " << M.indices.size()
+                          << "\n";
+        }
+
+        void updateText(int idx, const std::vector<std::string> &lines) {
+                if (!Texts || idx < 0 || idx >= (int)Texts->size())
+                        return;
+                SingleText &t = (*Texts)[idx];
+                t.usedLines = std::min((int)lines.size(), 4);
+                for (int i = 0; i < t.usedLines; ++i)
+                        t.l[i] = lines[i];
+                for (int i = t.usedLines; i < 4; ++i)
+                        t.l[i].clear();
+                M.cleanup();
+                M.vertices.clear();
+                M.indices.clear();
+                createTextMesh();
+                M.initMesh(BP, &VD);
+        }
 
 	void createTextDescriptorSets() {
 		DS.init(BP, &DSL, {

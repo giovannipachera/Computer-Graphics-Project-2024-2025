@@ -6,8 +6,7 @@
 #include "modules/LogoMaker.hpp"
 
 std::vector<SingleText> outText = {
-    {1, {" ", "", "", ""}, 0, 0},
-    {2, {"  ", "", "", ""}, 0, 0}};
+    {1, {"", "", "", ""}, 0, 0}};
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 mvpMat;
@@ -47,7 +46,6 @@ protected:
   TextMaker txt;
   LogoMaker logo;
 
-  int currScene = 0;
   float Ar;
   glm::vec3 Pos;
   float Yaw;
@@ -196,7 +194,7 @@ protected:
 
     logo.populateCommandBuffer(cb, currentImage);
 
-    txt.populateCommandBuffer(cb, currentImage, currScene);
+    txt.populateCommandBuffer(cb, currentImage);
   }
 
   void reRecordCommandBuffers() {
@@ -214,6 +212,10 @@ protected:
     createDescriptorPool();
     pipelinesAndDescriptorSetsInit();
     reRecordCommandBuffers();
+  }
+
+  void updateInstructions(const std::vector<std::string> &lines) {
+    txt.updateText(0, lines);
   }
 
   // Correzione SOLO per 'prm' (GLTF Z-up) → mondo Y-up. OBJ (pln) invariato.
@@ -274,7 +276,6 @@ protected:
         barbieAudio.play();
 
       logo.setCurrentLogo(currentBody);
-      currScene = currentBody;
       refreshUIResources();
 
       lastBody = currentBody;
