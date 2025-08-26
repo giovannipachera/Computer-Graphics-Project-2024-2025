@@ -15,17 +15,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Sfera.021",
+			"name":"Mesh.003",
 			"translation":[
-				49.764488220214844,
-				42.77973175048828,
-				26.379087448120117
+				37.50715255737305,
+				35.692970275878906,
+				27.773509979248047
 			]
 		}
 	],
 	"meshes":[
 		{
-			"name":"Sfera.022",
+			"name":"Mesh.638",
 			"primitives":[
 				{
 					"attributes":{
@@ -43,79 +43,79 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":422820,
+			"count":329242,
 			"max":[
-				692.2227172851562,
-				496.067626953125,
-				224.83074951171875
+				574.3987426757812,
+				503.1543884277344,
+				213.21002197265625
 			],
 			"min":[
-				-676.8651123046875,
-				-829.1913452148438,
-				-339.3312683105469
+				-664.6076049804688,
+				-559.20751953125,
+				-46.51276397705078
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":422820,
+			"count":329242,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":422820,
+			"count":329242,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":422820,
+			"count":329242,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5125,
-			"count":729600,
+			"count":579378,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":5073840,
+			"byteLength":3950904,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":5073840,
-			"byteOffset":5073840,
+			"byteLength":3950904,
+			"byteOffset":3950904,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3382560,
-			"byteOffset":10147680,
+			"byteLength":2633936,
+			"byteOffset":7901808,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3382560,
-			"byteOffset":13530240,
+			"byteLength":2633936,
+			"byteOffset":10535744,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2918400,
-			"byteOffset":16912800,
+			"byteLength":2317512,
+			"byteOffset":13169680,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":19831200,
+			"byteLength":15487192,
 			"uri":"environment.bin"
 		}
 	]

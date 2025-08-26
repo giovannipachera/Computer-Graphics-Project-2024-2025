@@ -76,7 +76,7 @@ protected:
   void setWindowParameters() {
     windowWidth = 800;
     windowHeight = 600;
-    windowTitle = "Hey buddy, are you a real country boy?";
+    windowTitle = "Country Roads";
     windowResizable = GLFW_TRUE;
     initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f};
     uniformBlocksInPool = 64;
@@ -146,7 +146,7 @@ protected:
     plowIndex = SC.InstanceIds["p"];
 
     // Pos del corpo: gestita da codice (non dal JSON)
-    Pos = glm::vec3(0.0f, 3.25f, 0.0f);
+    Pos = glm::vec3(0.0f, 3.45f, 0.0f);
     InitialPos = Pos;
     Yaw = 0.0f;
 
