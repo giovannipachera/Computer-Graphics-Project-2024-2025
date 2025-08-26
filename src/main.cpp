@@ -72,6 +72,14 @@ protected:
   std::vector<std::string> horse3 = {"hrs3"};
   std::vector<std::string> horse4 = {"hrs4"};
   std::vector<std::string> horse5 = {"hrs5"};
+  std::vector<std::string> horse6 = {"hrs6"};
+  std::vector<std::string> horse7 = {"hrs7"};
+  std::vector<std::string> horse8 = {"hrs8"};
+  std::vector<std::string> horse9 = {"hrs9"};
+  std::vector<std::string> horse10 = {"hrs10"};
+  std::vector<std::string> horse11 = {"hrs11"};
+
+
 
 
   std::unordered_set<int> tractorPartIdx;
@@ -677,7 +685,7 @@ protected:
       // Y = altezza del piano + offset del cavallo
       float yOffset = 0.5f; // regola in base all'altezza del cavallo
       glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
-                                         glm::vec3(-12.0f, 0.5f , -100.0f));
+                                         glm::vec3(-5.0f, 0.5f , -100.0f));
 
       // Composizione finale: traslazione * scala * base
       ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
@@ -749,6 +757,219 @@ protected:
       float yOffset = 0.5f; // regola in base all'altezza del cavallo
       glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
                                          glm::vec3(40.0f, 0.5f , -110.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+
+    // Mostra il cavallo 'hrs6' al centro del campo
+    for (const std::string &name : horse6) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-120.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(30.0f, 0.5f , -90.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+    }
+
+     // Mostra il cavallo 'hrs7' al centro del campo
+    for (const std::string &name : horse7) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(110.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-20.0f, 0.5f , -120.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'hrs8' al centro del campo
+    for (const std::string &name : horse8) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-48.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(25.0f, 0.5f , -115.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'hrs9' al centro del campo
+    for (const std::string &name : horse9) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3= glm::rotate(glm::mat4(1.0f), glm::radians(210.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(10.0f, 0.5f , -95.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'hrs10' al centro del campo
+    for (const std::string &name : horse10) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(280.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-20.0f, 0.5f , -110.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+
+
+    // Mostra il cavallo 'hrs10' al centro del campo
+    for (const std::string &name : horse11) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(186.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-18.0f, 0.5f , -90.0f));
 
       // Composizione finale: traslazione * scala * base
       ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
