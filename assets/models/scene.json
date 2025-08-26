@@ -12,7 +12,9 @@
     {"id":"hrs2", "model":"assets/models/horse_002.mgcg", "format":"MGCG"},
     {"id":"hrs3", "model":"assets/models/horse_003.mgcg", "format":"MGCG"},
     {"id":"hrs4", "model":"assets/models/horse_004.mgcg", "format":"MGCG"},
-    {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"}
+    {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"},
+    {"id":"chk", "model":"assets/models/chicken_001.mgcg", "format":"MGCG"}
+
   ],
   "textures": [
     {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -122,8 +124,87 @@
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
 
     { "id":"hrs11", "model":"hrs1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk1", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk2", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk3", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk4", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk5", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk6", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk7", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk8", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk9", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk10", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk11", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk11", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk12", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk13", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk14", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk15", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk16", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk17", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk18", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk19", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk20", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk21", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk22", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk23", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk24", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk25", "model":"chk", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"chk26", "model":"chk", "texture":"t14",
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] }
-
-
   ]
 }

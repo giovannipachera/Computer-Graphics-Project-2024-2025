@@ -78,6 +78,35 @@ protected:
   std::vector<std::string> horse9 = {"hrs9"};
   std::vector<std::string> horse10 = {"hrs10"};
   std::vector<std::string> horse11 = {"hrs11"};
+  std::vector<std::string> chicken1 = {"chk1"};
+  std::vector<std::string> chicken2 = {"chk2"};
+  std::vector<std::string> chicken3 = {"chk3"};
+  std::vector<std::string> chicken4 = {"chk4"};
+  std::vector<std::string> chicken5 = {"chk5"};
+  std::vector<std::string> chicken6 = {"chk6"};
+  std::vector<std::string> chicken7 = {"chk7"};
+  std::vector<std::string> chicken8 = {"chk8"};
+  std::vector<std::string> chicken9 = {"chk9"};
+  std::vector<std::string> chicken10 = {"chk10"};
+  std::vector<std::string> chicken11 = {"chk11"};
+  std::vector<std::string> chicken12 = {"chk12"};
+  std::vector<std::string> chicken13 = {"chk13"};
+  std::vector<std::string> chicken14 = {"chk14"};
+  std::vector<std::string> chicken15 = {"chk15"};
+  std::vector<std::string> chicken16 = {"chk16"};
+  std::vector<std::string> chicken17 = {"chk17"};
+  std::vector<std::string> chicken18 = {"chk18"};
+  std::vector<std::string> chicken19 = {"chk19"};
+  std::vector<std::string> chicken20 = {"chk20"};
+  std::vector<std::string> chicken21 = {"chk21"};
+  std::vector<std::string> chicken22 = {"chk22"};
+  std::vector<std::string> chicken23 = {"chk23"};
+  std::vector<std::string> chicken24 = {"chk24"};
+  std::vector<std::string> chicken25 = {"chk25"};
+  std::vector<std::string> chicken26 = {"chk26"};
+
+
+
 
 
 
@@ -944,12 +973,9 @@ protected:
 
 
 
-
-
     }
 
-
-    // Mostra il cavallo 'hrs10' al centro del campo
+    // Mostra il cavallo 'hrs11' al centro del campo
     for (const std::string &name : horse11) {
       int i = SC.InstanceIds[name];
 
@@ -980,10 +1006,707 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
 
 
+    }
+
+    // Mostra la gallina 'chk1'
+    for (const std::string &name : chicken1) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+
+
+      // Scala la gallina (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-108.0f, 0.5f , -30.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+    }
+
+     // Mostra la gallina 'chk2'
+    for (const std::string &name : chicken2) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-110.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-106.0f, 0.5f , -47.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
 
 
 
     }
+    // Mostra la gallina 'chk3'
+    for (const std::string &name : chicken3) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(48.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala la gallina (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-80.0f, 0.5f , -55.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra la gallina 'chk4'
+    for (const std::string &name : chicken4) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3= glm::rotate(glm::mat4(1.0f), glm::radians(-60.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala la gallina (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-93.0f, 0.5f , -30.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra la gallina 'chk5'
+    for (const std::string &name : chicken5) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-26.0f), glm::vec3(0,1,0));
+
+
+      // Scala la gallina (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-99.0f, 0.5f , -46.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+
+    // Mostra il cavallo 'chk6' al centro del campo
+    for (const std::string &name : chicken6) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-120.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-110.0f, 0.5f , -34.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+    }
+
+     // Mostra il cavallo 'chk7' al centro del campo
+    for (const std::string &name : chicken7) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(110.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-104.0f, 0.5f , -52.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'chk8' al centro del campo
+    for (const std::string &name : chicken8) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-48.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-100.0f, 0.5f , -30.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'chk9' al centro del campo
+    for (const std::string &name : chicken9) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3= glm::rotate(glm::mat4(1.0f), glm::radians(210.0f), glm::vec3(0,1,0));
+
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-83.0f, 0.5f , -35.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr * rotHr3* rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+
+
+    }
+    // Mostra il cavallo 'chk10' al centro del campo
+    for (const std::string &name : chicken10) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(280.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-108.0f, 0.5f , -56.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+
+    }
+
+    // Mostra il cavallo 'chk11' al centro del campo
+    for (const std::string &name : chicken11) {
+      int i = SC.InstanceIds[name];
+
+      // Base rotation (se GLTF Z-up)
+      glm::mat4 baseHr = baseFor(name);
+
+      // Rotazione di 90° attorno a Z
+      glm::mat4 rotHr = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(186.0f), glm::vec3(0,1,0));
+
+
+      // Scala il cavallo (1.5x)
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+
+      // Traslazione: posizione centrale del campo
+      // Y = altezza del piano + offset del cavallo
+      float yOffset = 0.5f; // regola in base all'altezza del cavallo
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-92.0f, 0.5f , -37.0f));
+
+      // Composizione finale: traslazione * scala * base
+      ubo.mMat = transHr* rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+
+
+    }
+
+
+        // Mostra la gallina 'chk12'
+    for (const std::string &name : chicken12) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(35.0f),  glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-95.0f, 0.5f , -50.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk13'
+    for (const std::string &name : chicken13) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-75.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-120.0f, 0.5f , -40.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk14'
+    for (const std::string &name : chicken14) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(150.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-87.0f, 0.5f , -25.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk15'
+    for (const std::string &name : chicken15) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-20.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-115.0f, 0.5f , -55.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk16'
+    for (const std::string &name : chicken16) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(95.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-102.0f, 0.5f , -60.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+
+        // Mostra la gallina 'chk17'
+    for (const std::string &name : chicken17) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(15.0f),  glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-90.0f, 0.5f , -65.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk18'
+    for (const std::string &name : chicken18) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-45.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-125.0f, 0.5f , -48.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk19'
+    for (const std::string &name : chicken19) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(95.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-100.0f, 0.5f , -75.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk20'
+    for (const std::string &name : chicken20) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-120.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-115.0f, 0.5f , -30.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk21'
+    for (const std::string &name : chicken21) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-85.0f, 0.5f , -50.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk22'
+    for (const std::string &name : chicken22) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-200.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-105.0f, 0.5f , -25.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk23'
+    for (const std::string &name : chicken23) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(130.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-97.0f, 0.5f , -62.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk24'
+    for (const std::string &name : chicken24) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-10.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-118.0f, 0.5f , -60.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk25'
+    for (const std::string &name : chicken25) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-112.0f, 0.5f , -72.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // Mostra la gallina 'chk26'
+    for (const std::string &name : chicken26) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseHr = baseFor(name);
+
+      glm::mat4 rotHr  = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotHr2 = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotHr3 = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0,1,0));
+
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f),
+                                         glm::vec3(-90.0f, 0.5f , -40.0f));
+
+      ubo.mMat   = transHr * rotHr3 * rotHr * rotHr2 * scaleHr * baseHr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+
 
 
 
