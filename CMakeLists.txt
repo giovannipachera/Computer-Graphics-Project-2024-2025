@@ -89,8 +89,12 @@ elseif(WIN32)
     # Windows specific configurations
 
     # Set paths to libraries (modify these based on your SDK and library installation)
-    set(GLFW "C:/VulkanSDK/libs/glfw-3.4.bin.WIN64")
-    set(GLM "C:/VulkanSDK/libs/glm")
+    set(GLFW "C:/Users/admin/VulkanSDK/libs/glfw-3.4.bin.WIN64")
+    set(GLM "C:/Users/admin/VulkanSDK/libs/glm")
+
+
+
+
     set(GLSLANG_VALIDATOR "C:/VulkanSDK/1.4.304.0/Bin/glslangValidator.exe")
 
 
@@ -98,7 +102,7 @@ elseif(WIN32)
     list(APPEND INCLUDE_DIRS "${GLFW}/include" ${GLM} headers)
 
     # List of libraries to link to the executable
-    list(APPEND LINK_LIBS "${GLFW}/lib-mingw-w64/libglfw3.a")
+    list(APPEND LINK_LIBS "${GLFW}/lib-mingw-w64/libglfw3.a" winmm )
     file(GLOB_RECURSE SOURCES src/*.cpp)
     file(GLOB_RECURSE HEADERS include/*.h include/*.hpp)
 

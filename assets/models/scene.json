@@ -1,91 +1,111 @@
 {
-	"models": [
-		{"id":"tb",  "model":"assets/models/tractor_body.gltf",      "format":"GLTF"},
-		{"id":"ax",  "model":"assets/models/axle.gltf",              "format":"GLTF"},
-		{"id":"fw", "model":"assets/models/front_wheel.gltf",  "format":"GLTF"},
-		{"id":"bw", "model":"assets/models/back_wheel.gltf",   "format":"GLTF"},
-		{"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
-		{"id":"p", "model":"assets/models/plow.gltf", "format":"GLTF"},
-		{"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
-		{"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"},
-		{"id":"c", "model":"assets/models/corn_field.gltf", "format":"GLTF"}
-	],
-	"textures": [
-		{"id":"t0","texture":"assets/textures/body_classic_texture.png"},
-		{"id":"t1","texture":"assets/textures/axle_classic_texture.png"},
-		{"id":"t2","texture":"assets/textures/front_wheel_classic_texture.png"},
-		{"id":"t3","texture":"assets/textures/back_wheel_classic_texture.png"},
-		{"id":"t4","texture":"assets/textures/fender_classic_texture.png"},
-		{"id":"t5","texture":"assets/textures/Porto.png"},
-		{"id":"t6","texture":"assets/textures/textures.png"},
-		{"id":"t7","texture":"assets/textures/plow_texture.png"},
-		{"id":"t8","texture":"assets/textures/body_barbie_texture.png"},
-		{"id":"t9","texture":"assets/textures/axle_barbie_texture.png"},
-		{"id":"t10","texture":"assets/textures/front_wheel_barbie_texture.png"},
-		{"id":"t11","texture":"assets/textures/back_wheel_barbie_texture.png"},
-		{"id":"t12","texture":"assets/textures/back_wheel_barbie_texture.png"},
-		{"id":"t13","texture":"assets/textures/fender_barbie_texture.png"},
-		{"id":"t14","texture":"assets/textures/corn_texture.png"}
-	],
-	"instances": [
-		{ "id":"tbc",  "model":"tb",  "texture":"t0",
-			"transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
+  "models": [
+    {"id":"tb",  "model":"assets/models/tractor_body.gltf",      "format":"GLTF"},
+    {"id":"ax",  "model":"assets/models/axle.gltf",              "format":"GLTF"},
+    {"id":"fw", "model":"assets/models/front_wheel.gltf",  "format":"GLTF"},
+    {"id":"bw", "model":"assets/models/back_wheel.gltf",   "format":"GLTF"},
+    {"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
+    {"id":"p", "model":"assets/models/plow.gltf", "format":"GLTF"},
+    {"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
+    {"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"},
+    {"id":"hrs1", "model":"assets/models/horse_001.mgcg", "format":"MGCG"},
+    {"id":"hrs2", "model":"assets/models/horse_002.mgcg", "format":"MGCG"},
+    {"id":"hrs3", "model":"assets/models/horse_003.mgcg", "format":"MGCG"},
+    {"id":"hrs4", "model":"assets/models/horse_004.mgcg", "format":"MGCG"},
+    {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"}
+  ],
+  "textures": [
+    {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
+    {"id":"t1","texture":"assets/textures/axle_classic_texture.png"},
+    {"id":"t2","texture":"assets/textures/front_wheel_classic_texture.png"},
+    {"id":"t3","texture":"assets/textures/back_wheel_classic_texture.png"},
+    {"id":"t4","texture":"assets/textures/fender_classic_texture.png"},
+    {"id":"t5","texture":"assets/textures/Porto.png"},
+    {"id":"t6","texture":"assets/textures/textures.png"},
+    {"id":"t7","texture":"assets/textures/plow_texture.png"},
+    {"id":"t8","texture":"assets/textures/body_barbie_texture.png"},
+    {"id":"t9","texture":"assets/textures/axle_barbie_texture.png"},
+    {"id":"t10","texture":"assets/textures/front_wheel_barbie_texture.png"},
+    {"id":"t11","texture":"assets/textures/back_wheel_barbie_texture.png"},
+    {"id":"t12","texture":"assets/textures/back_wheel_barbie_texture.png"},
+    {"id":"t13","texture":"assets/textures/fender_barbie_texture.png"},
+    {"id":"t14","texture":"assets/textures/Textures-Animals.png"}
 
-		{ "id":"tbb",  "model":"tb",  "texture":"t8",
-			"transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
 
-		{ "id":"axc",  "model":"ax",  "texture":"t1",
-			"transform":[1,0,0,0,    0,1,0, -2.3,   0,0,1, 2.75,   0,0,0,1] },
+  ],
+  "instances": [
+    { "id":"tbc",  "model":"tb",  "texture":"t0",
+      "transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
 
-		{ "id":"axb",  "model":"ax",  "texture":"t9",
-			"transform":[1,0,0,0,    0,1,0, -2.3,   0,0,1, 2.75,   0,0,0,1] },
+    { "id":"tbb",  "model":"tb",  "texture":"t8",
+      "transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
 
-		{ "id":"flwc", "model":"fw", "texture":"t2",
-			"transform":[1,0,0,1.8, 0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
+    { "id":"axc",  "model":"ax",  "texture":"t1",
+      "transform":[1,0,0,0,    0,1,0, -2.3,   0,0,1, 2.75,   0,0,0,1] },
 
-		{ "id":"frwc", "model":"fw", "texture":"t2",
-			"transform":[1,0,0,-1.8,  0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
+    { "id":"axb",  "model":"ax",  "texture":"t9",
+      "transform":[1,0,0,0,    0,1,0, -2.3,   0,0,1, 2.75,   0,0,0,1] },
 
-		{ "id":"blwc", "model":"bw", "texture":"t3",
-			"transform":[1,0,0,1.5, 0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
+    { "id":"flwc", "model":"fw", "texture":"t2",
+      "transform":[1,0,0,1.8, 0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
 
-		{ "id":"brwc", "model":"bw", "texture":"t3",
-			"transform":[1,0,0,-1.5,  0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
+    { "id":"frwc", "model":"fw", "texture":"t2",
+      "transform":[1,0,0,-1.8,  0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
 
-		{ "id":"flwb", "model":"fw", "texture":"t10",
-			"transform":[1,0,0,1.8, 0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
+    { "id":"blwc", "model":"bw", "texture":"t3",
+      "transform":[1,0,0,1.5, 0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
 
-		{ "id":"frwb", "model":"fw", "texture":"t10",
-			"transform":[1,0,0,-1.8,  0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
+    { "id":"brwc", "model":"bw", "texture":"t3",
+      "transform":[1,0,0,-1.5,  0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
 
-		{ "id":"blwb", "model":"bw", "texture":"t11",
-			"transform":[1,0,0,1.5, 0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
+    { "id":"flwb", "model":"fw", "texture":"t10",
+      "transform":[1,0,0,1.8, 0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
 
-		{ "id":"brwb", "model":"bw", "texture":"t11",
-			"transform":[1,0,0,-1.5,  0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
+    { "id":"frwb", "model":"fw", "texture":"t10",
+      "transform":[1,0,0,-1.8,  0,1,0,-2.35,     0,0,1,2.7,   0,0,0,1] },
 
-		{ "id":"lfc", "model":"f", "texture":"t4",
-			"transform":[1,0,0,0.1, 0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
+    { "id":"blwb", "model":"bw", "texture":"t11",
+      "transform":[1,0,0,1.5, 0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
 
-		{ "id":"rfc", "model":"f", "texture":"t4",
-			"transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
+    { "id":"brwb", "model":"bw", "texture":"t11",
+      "transform":[1,0,0,-1.5,  0,1,0,-2.0,     0,0,1,-2.05,  0,0,0,1] },
 
-		{ "id":"lfb", "model":"f", "texture":"t13",
-			"transform":[1,0,0,0.1, 0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
+    { "id":"lfc", "model":"f", "texture":"t4",
+      "transform":[1,0,0,0.1, 0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
 
-		{ "id":"rfb", "model":"f", "texture":"t13",
-			"transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
+    { "id":"rfc", "model":"f", "texture":"t4",
+      "transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
 
-		{ "id":"p", "model":"p", "texture":"t7",
-			"transform":[1,0,0,-100,  0,1,0,3,     0,0,1,0,   0,0,0,1] },
+    { "id":"lfb", "model":"f", "texture":"t13",
+      "transform":[1,0,0,0.1, 0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
 
-		{ "id":"pln", "model":"pln", "texture":"t5",
-			"transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
+    { "id":"rfb", "model":"f", "texture":"t13",
+      "transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
 
-		{ "id":"prm", "model":"prm", "texture":"t6",
-			"transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+    { "id":"p", "model":"p", "texture":"t7",
+      "transform":[1,0,0,-100,  0,1,0,3,     0,0,1,0,   0,0,0,1] },
 
-		{ "id":"c", "model":"c", "texture":"t14",
-			"transform":[ 10,0,0,0,  0,10,0,0,  0,0,10,0,  0,0,0,1 ] }
-	]
+    { "id":"pln", "model":"pln", "texture":"t5",
+      "transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
+
+    { "id":"prm", "model":"prm", "texture":"t6",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"hrs1", "model":"hrs1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"hrs2", "model":"hrs2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"hrs3", "model":"hrs3", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"hrs4", "model":"hrs4", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"hrs5", "model":"hrs5", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] }
+
+
+  ]
 }
