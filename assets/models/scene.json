@@ -13,8 +13,8 @@
     {"id":"hrs3", "model":"assets/models/horse_003.mgcg", "format":"MGCG"},
     {"id":"hrs4", "model":"assets/models/horse_004.mgcg", "format":"MGCG"},
     {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"},
-    {"id":"chk", "model":"assets/models/chicken_001.mgcg", "format":"MGCG"}
-
+    {"id":"chk", "model":"assets/models/chicken_001.mgcg", "format":"MGCG"},
+    {"id":"bl", "model":"assets/models/blade.gltf", "format":"GLTF"}
   ],
   "textures": [
     {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -31,7 +31,8 @@
     {"id":"t11","texture":"assets/textures/back_wheel_barbie_texture.png"},
     {"id":"t12","texture":"assets/textures/back_wheel_barbie_texture.png"},
     {"id":"t13","texture":"assets/textures/fender_barbie_texture.png"},
-    {"id":"t14","texture":"assets/textures/Textures-Animals.png"}
+    {"id":"t14","texture":"assets/textures/Textures-Animals.png"},
+    {"id":"t15","texture":"assets/textures/blade_texture.png"}
 
 
   ],
@@ -205,6 +206,16 @@
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
 
     { "id":"chk26", "model":"chk", "texture":"t14",
-      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] }
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"bl1", "model":"bl", "texture":"t15",
+      "transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
+
+    { "id":"bl2", "model":"bl", "texture":"t15",
+      "transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] },
+
+    { "id":"bl3", "model":"bl", "texture":"t15",
+      "transform":[1,0,0,0,    0,1,0,0,     0,0,1,0,     0,0,0,1] }
+
   ]
 }

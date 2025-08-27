@@ -67,6 +67,7 @@ protected:
   std::vector<std::string> tractorFenders = {"lfc", "rfc", "lfb", "rfb"};
   std::vector<std::string> tractorPlow = {"p"};
   std::vector<std::string> tractorScene = {"pln", "prm"};
+  std::vector<std::string> blades = {"bl1", "bl2", "bl3"};
   std::vector<std::string> horse1 = {"hrs1"};
   std::vector<std::string> horse2 = {"hrs2"};
   std::vector<std::string> horse3 = {"hrs3"};
@@ -426,12 +427,13 @@ protected:
         glm::radians(70.0f),   // FOV più naturale
         Ar,
         0.1f,
-        500.0f);
+        1000.0f);
 
     // Global UBO
     GlobalUniformBufferObject gubo{};
-    gubo.lightDir =
-        glm::vec3(cos(glm::radians(135.0f)), sin(glm::radians(135.0f)), 0.0f);
+    // DOPO: sole dall’alto, leggermente verso la camera
+    gubo.lightDir = glm::normalize(glm::vec3(-1.0f, -1.0f, 0.0f));
+
     gubo.lightColor = glm::vec4(1.0f);
     gubo.eyePos = CamPos;
     gubo.eyeDir = glm::vec4(0, 0, 0, 1);
@@ -588,6 +590,17 @@ protected:
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
       ubo.mMat = SC.I[i].Wm * baseTr;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    for (const std::string &name : blades) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseTr = baseFor(name);
+
+
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
