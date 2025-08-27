@@ -14,7 +14,8 @@
     {"id":"hrs4", "model":"assets/models/horse_004.mgcg", "format":"MGCG"},
     {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"},
     {"id":"chk", "model":"assets/models/chicken_001.mgcg", "format":"MGCG"},
-    {"id":"bl", "model":"assets/models/blade.gltf", "format":"GLTF"}
+    {"id":"bl", "model":"assets/models/blade.gltf", "format":"GLTF"},
+    {"id":"m", "model":"assets/models/mill.gltf", "format":"GLTF"}
   ],
   "textures": [
     {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -32,9 +33,8 @@
     {"id":"t12","texture":"assets/textures/back_wheel_barbie_texture.png"},
     {"id":"t13","texture":"assets/textures/fender_barbie_texture.png"},
     {"id":"t14","texture":"assets/textures/Textures-Animals.png"},
-    {"id":"t15","texture":"assets/textures/blade_texture.png"}
-
-
+    {"id":"t15","texture":"assets/textures/blade_texture.png"},
+    {"id":"t16","texture":"assets/textures/mill_texture.png"}
   ],
   "instances": [
     { "id":"tbc",  "model":"tb",  "texture":"t0",
@@ -215,7 +215,9 @@
       "transform":[1,0,0,-280.5,    0,1,0,95.7,     0,0,1,-209.2,     0,0,0,1] },
 
     { "id":"bl3", "model":"bl", "texture":"t15",
-      "transform":[1,0,0,-255.5,    0,1,0,78,     0,0,1,-236,     0,0,0,1] }
+      "transform":[1,0,0,-255.5,    0,1,0,78,     0,0,1,-236,     0,0,0,1] },
 
+    { "id":"m", "model":"m", "texture":"t16",
+      "transform":[1,0,0,-3,    0,1,0,33,     0,0,1,-5,     0,0,0,1] }
   ]
 }

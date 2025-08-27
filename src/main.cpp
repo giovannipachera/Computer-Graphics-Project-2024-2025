@@ -79,10 +79,11 @@ protected:
   std::vector<std::string> tractorPlow = {"p"};
   std::vector<std::string> tractorScene = {"pln", "prm"};
   std::vector<Blade> blades = {
-    {"bl1", glm::vec3(-300.0f, 100.0f, -300.0f)},  // prima pala
-    {"bl2", glm::vec3( 15.0f, 20.0f, 5.0f)},  // seconda pala
-    {"bl3", glm::vec3( 40.0f, 20.0f, -8.0f)}  // terza pala
+    {"bl1", glm::vec3(0.0f, 0.0f, 0.0f)},  // prima pala
+    {"bl2", glm::vec3( 0.0f, 0.0f, 0.0f)},  // seconda pala
+    {"bl3", glm::vec3( 0.0f, 0.0f, 0.0f)}  // terza pala
   };
+  std::vector<std::string> mill = {"m"};
   std::vector<Animal> horses = {
       {"hrs1", {6.0f, 0.5f, -110.0f}, 0.0f},
       {"hrs2", {20.0f, 0.5f, -100.0f}, -110.0f},
@@ -661,6 +662,50 @@ for (const auto &b : blades) {
     SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
     SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
 }
+
+
+    // --- MULINO (id "m"): tilt fisso + spin lento attorno a X ---
+    // velocità più lenta delle eoliche, stesso verso (usa -=)
+    static float millRot = 0.0f;
+    millRot -= deltaT * glm::radians(15.0f); // regola i 15°/s a gusto
+
+    for (const std::string &name : mill) {
+      int i = SC.InstanceIds[name];
+      glm::mat4 baseTr = baseFor(name);
+
+      // Matrice di partenza e base ortonormale (evita wobble)
+      glm::mat4 M0 = SC.I[i].Wm * baseTr;
+      glm::vec3 T  = glm::vec3(M0[3]);
+      glm::vec3 Xw = glm::normalize(glm::vec3(M0[0]));
+      glm::vec3 Yw = glm::normalize(glm::vec3(M0[1]));
+      glm::vec3 Zw = glm::normalize(glm::vec3(M0[2]));
+      glm::mat4 R0(1.0f);
+      R0[0] = glm::vec4(Xw, 0.0f);
+      R0[1] = glm::vec4(Yw, 0.0f);
+      R0[2] = glm::vec4(Zw, 0.0f);
+      glm::mat4 M_noScale = glm::translate(glm::mat4(1.0f), T) * R0;
+
+      // tuoi tilt fissati (tienili come li hai trovati buoni)
+      const float tiltX_deg = -15.0f;
+      const float tiltY_deg = -20.0f;
+
+      glm::mat4 RtiltX = glm::rotate(glm::mat4(1.0f), glm::radians(tiltX_deg), glm::vec3(1,0,0));
+      glm::mat4 RtiltY = glm::rotate(glm::mat4(1.0f), glm::radians(tiltY_deg), glm::vec3(0,0,1));
+
+      // SPIN attorno all’asse X locale (perché in Blender l’asse del mulino l’abbiamo allineato a +X)
+      glm::mat4 RspinX = glm::rotate(glm::mat4(1.0f), millRot, glm::vec3(1,0,0));
+
+      // Ordine: prima tilt (posa iniziale), poi spin (verso coerente con eoliche)
+      glm::mat4 Rtotal = RtiltX * RtiltY * RspinX;
+
+      ubo.mMat  = M_noScale * Rtotal;  // origin = centro mozzo → nessun toPivot/fromPivot
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
 
 
 
