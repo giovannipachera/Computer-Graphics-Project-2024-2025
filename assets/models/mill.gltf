@@ -15,12 +15,12 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Mesh.1348"
+			"name":"Mesh.1426"
 		}
 	],
 	"meshes":[
 		{
-			"name":"Mesh.1348",
+			"name":"Mesh.1427",
 			"primitives":[
 				{
 					"attributes":{
@@ -38,80 +38,80 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":3200,
+			"count":2798,
 			"max":[
-				13.485602378845215,
-				29.751754760742188,
-				32.88644027709961
+				3.464938163757324,
+				23.4488525390625,
+				23.32723045349121
 			],
 			"min":[
-				-0.019869685173034668,
-				-37.7906494140625,
-				-18.958473205566406
+				-5.5155930519104,
+				-22.657119750976562,
+				-23.431964874267578
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":3200,
+			"count":2798,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":3200,
+			"count":2798,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":3200,
+			"count":2798,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5123,
-			"count":5136,
+			"count":6078,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":38400,
+			"byteLength":33576,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":38400,
-			"byteOffset":38400,
+			"byteLength":33576,
+			"byteOffset":33576,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":25600,
-			"byteOffset":76800,
+			"byteLength":22384,
+			"byteOffset":67152,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":25600,
-			"byteOffset":102400,
+			"byteLength":22384,
+			"byteOffset":89536,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":10272,
-			"byteOffset":128000,
+			"byteLength":12156,
+			"byteOffset":111920,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":138272,
-			"uri":"blade.bin"
+			"byteLength":124076,
+			"uri":"mill.bin"
 		}
 	]
 }

@@ -79,9 +79,10 @@ protected:
   std::vector<std::string> tractorPlow = {"p"};
   std::vector<std::string> tractorScene = {"pln", "prm"};
   std::vector<Blade> blades = {
-      {"bl1", glm::vec3(0.0f)},
-      {"bl2", glm::vec3(0.0f)},
-      {"bl3", glm::vec3(0.0f)}};
+    {"bl1", glm::vec3(-300.0f, 100.0f, -300.0f)},  // prima pala
+    {"bl2", glm::vec3( 15.0f, 20.0f, 5.0f)},  // seconda pala
+    {"bl3", glm::vec3( 40.0f, 20.0f, -8.0f)}  // terza pala
+  };
   std::vector<Animal> horses = {
       {"hrs1", {6.0f, 0.5f, -110.0f}, 0.0f},
       {"hrs2", {20.0f, 0.5f, -100.0f}, -110.0f},
@@ -612,19 +613,57 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    static float bladeRot = 0.0f;
-    bladeRot += deltaT * glm::radians(60.0f);
-    for (const auto &b : blades) {
-      int i = SC.InstanceIds[b.id];
-      glm::mat4 baseTr = baseFor(b.id);
-      glm::mat4 rot = glm::rotate(glm::mat4(1.0f), bladeRot, glm::vec3(0, 1, 0));
-      glm::mat4 trans = glm::translate(glm::mat4(1.0f), b.position);
-      ubo.mMat = trans * rot * baseTr;
-      ubo.mvpMat = ViewPrj * ubo.mMat;
-      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
-      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
-      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
-    }
+    // --- PALE EOLICHE: rotazione pulita attorno al mozzo, senza wobble ---
+static float bladeRot = 20.0f;
+bladeRot -= deltaT * glm::radians(60.0f);
+
+for (const auto &b : blades) {
+    int i = SC.InstanceIds[b.id];
+
+    // 1) Pose di base dall'istanza (pos + orientazione corretta dal JSON)
+    glm::mat4 M0 = SC.I[i].Wm * baseFor(b.id);
+
+    // 2) Elimina scala/shear dall'istanza (causa classica del "ballo")
+    glm::vec3 T = glm::vec3(M0[3]);
+    glm::vec3 Xw = glm::vec3(M0[0]), Yw = glm::vec3(M0[1]), Zw = glm::vec3(M0[2]);
+    if (glm::length(Xw) > 0) Xw = glm::normalize(Xw);
+    if (glm::length(Yw) > 0) Yw = glm::normalize(Yw);
+    if (glm::length(Zw) > 0) Zw = glm::normalize(Zw);
+    glm::mat4 R0(1.0f);
+    R0[0] = glm::vec4(Xw, 0);
+    R0[1] = glm::vec4(Yw, 0);
+    R0[2] = glm::vec4(Zw, 0);
+    glm::mat4 M_noScale = glm::translate(glm::mat4(1.0f), T) * R0;
+
+    // 3) Asse LOCALE di rotazione: scegliamo quello più orizzontale
+    glm::vec3 axes[3] = { {1,0,0}, {0,1,0}, {0,0,1} };
+    glm::vec3 axesW[3] = {
+        glm::vec3(R0 * glm::vec4(axes[0], 0)),
+        glm::vec3(R0 * glm::vec4(axes[1], 0)),
+        glm::vec3(R0 * glm::vec4(axes[2], 0))
+    };
+    int best = 0; float sc = fabs(axesW[0].y);
+    for (int k = 1; k < 3; ++k) { float s = fabs(axesW[k].y); if (s < sc) { sc = s; best = k; } }
+    glm::vec3 axisLocal = axes[best];  // se gira al contrario, usa -bladeRot
+
+    // 4) Micro-offset del mozzo (se l'origin non è centrato al micron)
+    glm::vec3 hubLocal = glm::vec3(0.0f); // es. {0.0f, -0.02f, 0.0f} se serve
+    glm::mat4 toHub   = glm::translate(glm::mat4(1.0f),  hubLocal);
+    glm::mat4 fromHub = glm::translate(glm::mat4(1.0f), -hubLocal);
+
+    // 5) Rotazione locale attorno al mozzo
+    glm::mat4 Rspin = glm::rotate(glm::mat4(1.0f), bladeRot, axisLocal);
+
+    ubo.mMat  = M_noScale * toHub * Rspin * fromHub;
+    ubo.mvpMat = ViewPrj * ubo.mMat;
+    ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+
+    SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+    SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+}
+
+
+
 
     for (const auto &h : horses) {
       int i = SC.InstanceIds[h.id];
