@@ -97,10 +97,10 @@ protected:
       {"hrs10", {-20.0f, 0.5f, -110.0f}, 280.0f},
       {"hrs11", {-18.0f, 0.5f, -90.0f}, 186.0f}};
   std::vector<Animal> chickens = {
-      {"chk1", {-108.0f, 0.5f, -30.0f}, 0.0f},
+      {"chk1", {-108.0f, 0.5f, -35.0f}, 0.0f},
       {"chk2", {-106.0f, 0.5f, -47.0f}, -110.0f},
       {"chk3", {-80.0f, 0.5f, -55.0f}, 48.0f},
-      {"chk4", {-93.0f, 0.5f, -30.0f}, -60.0f},
+      {"chk4", {-93.0f, 0.5f, -33.0f}, -60.0f},
       {"chk5", {-99.0f, 0.5f, -46.0f}, -26.0f},
       {"chk6", {-110.0f, 0.5f, -34.0f}, -120.0f},
       {"chk7", {-104.0f, 0.5f, -52.0f}, 110.0f},
@@ -113,16 +113,59 @@ protected:
       {"chk14", {-87.0f, 0.5f, -25.0f}, 150.0f},
       {"chk15", {-115.0f, 0.5f, -55.0f}, -20.0f},
       {"chk16", {-102.0f, 0.5f, -60.0f}, 95.0f},
-      {"chk17", {-90.0f, 0.5f, -65.0f}, 15.0f},
+      {"chk17", {-90.0f, 0.5f, -62.0f}, 15.0f},
       {"chk18", {-125.0f, 0.5f, -48.0f}, -45.0f},
-      {"chk19", {-100.0f, 0.5f, -75.0f}, 95.0f},
-      {"chk20", {-115.0f, 0.5f, -30.0f}, -120.0f},
+      {"chk19", {-100.0f, 0.5f, -45.0f}, 95.0f},
+      {"chk20", {-115.0f, 0.5f, -32.0f}, -120.0f},
       {"chk21", {-85.0f, 0.5f, -50.0f}, 60.0f},
       {"chk22", {-105.0f, 0.5f, -25.0f}, -200.0f},
       {"chk23", {-97.0f, 0.5f, -62.0f}, 130.0f},
       {"chk24", {-118.0f, 0.5f, -60.0f}, -10.0f},
-      {"chk25", {-112.0f, 0.5f, -72.0f}, -90.0f},
+      {"chk25", {-112.0f, 0.5f, -42.0f}, -90.0f},
       {"chk26", {-90.0f, 0.5f, -40.0f}, 30.0f}};
+
+  std::vector<Animal> cows = {
+      {"cow1", {156.0f, 0.5f, 110.0f}, 0.0f},
+      {"cow2", {170.0f, 0.5f, 100.0f}, -45.0f},
+      {"cow3", {145.0f, 0.5f, 100.0f}, 30.0f},
+      {"cow4", {144.0f, 0.5f, 120.0f}, -60.0f},
+      {"cow5", {190.0f, 0.5f, 110.0f}, -15.0f},
+      {"cow6", {180.0f, 0.5f, 90.0f}, -120.0f},
+      {"cow7", {130.0f, 0.5f, 120.0f}, 75.0f},
+      {"cow8", {175.0f, 0.5f, 115.0f}, -30.0f},
+      {"cow9", {160.0f, 0.5f, 95.0f}, 210.0f},
+      {"cow10", {130.0f, 0.5f, 110.0f}, 280.0f},
+      {"cow11", {156.0f, 0.5f, 80.0f}, 10.0f},
+      {"cow12", {170.0f, 0.5f, 70.0f}, -90.0f},
+      {"cow13", {145.0f, 0.5f, 70.0f}, 45.0f},
+      {"cow14", {144.0f, 0.5f, 90.0f}, -75.0f},
+      {"cow15", {190.0f, 0.5f, 80.0f}, -20.0f},
+      {"cow16", {180.0f, 0.5f, 60.0f}, -150.0f},
+      {"cow17", {130.0f, 0.5f, 90.0f}, 60.0f},
+      {"cow18", {175.0f, 0.5f, 85.0f}, -10.0f},
+      {"cow19", {160.0f, 0.5f, 65.0f}, 190.0f},
+      {"cow20", {130.0f, 0.5f, 80.0f}, 250.0f},
+      {"cow21", {156.0f, 0.5f, 50.0f}, 5.0f},
+      {"cow22", {170.0f, 0.5f, 40.0f}, -100.0f},
+      {"cow23", {145.0f, 0.5f, 40.0f}, 35.0f},
+      {"cow24", {144.0f, 0.5f, 60.0f}, -50.0f},
+      {"cow25", {190.0f, 0.5f, 50.0f}, -5.0f},
+      {"cow26", {180.0f, 0.5f, 30.0f}, -130.0f},
+         {"cow27", {130.0f, 0.5f, 60.0f}, 90.0f},
+      {"cow28", {175.0f, 0.5f, 55.0f}, -35.0f},
+      {"cow29", {160.0f, 0.5f, 35.0f}, 170.0f},
+      {"cow30", {130.0f, 0.5f, 50.0f}, 240.0f}
+  };
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -734,6 +777,22 @@ for (const auto &b : blades) {
       glm::mat4 scaleCh = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
       glm::mat4 transCh = glm::translate(glm::mat4(1.0f), c.position);
       ubo.mMat = transCh * rotY * rotZ * rotX * scaleCh * baseCh;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+
+    for (const auto &h : cows) {
+      int i = SC.InstanceIds[h.id];
+      glm::mat4 baseHr = baseFor(h.id);
+      glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+      glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1, 0, 0));
+      glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), glm::radians(h.rotY), glm::vec3(0, 1, 0));
+      glm::mat4 scaleHr = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+      glm::mat4 transHr = glm::translate(glm::mat4(1.0f), h.position);
+      ubo.mMat = transHr * rotY * rotZ * rotX * scaleHr * baseHr;
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);

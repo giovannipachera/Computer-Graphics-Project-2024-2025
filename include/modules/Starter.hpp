@@ -1500,12 +1500,13 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 	}
 
 	void createDescriptorPool() {
+    	setsInPool = 200;
 		std::array<VkDescriptorPoolSize, 2> poolSizes{};
 		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<uint32_t>(uniformBlocksInPool * 200 *
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(uniformBlocksInPool * 300 *
 															 swapChainImages.size());
 		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[1].descriptorCount = static_cast<uint32_t>(texturesInPool * 200 *
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(texturesInPool * 300 *
 															 swapChainImages.size());
 
 		VkDescriptorPoolCreateInfo poolInfo{};

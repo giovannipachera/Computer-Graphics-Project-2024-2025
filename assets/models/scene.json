@@ -15,7 +15,9 @@
     {"id":"hrs5", "model":"assets/models/horse_005.mgcg", "format":"MGCG"},
     {"id":"chk", "model":"assets/models/chicken_001.mgcg", "format":"MGCG"},
     {"id":"bl", "model":"assets/models/blade.gltf", "format":"GLTF"},
-    {"id":"m", "model":"assets/models/mill.gltf", "format":"GLTF"}
+    {"id":"m", "model":"assets/models/mill.gltf", "format":"GLTF"},
+    {"id":"cow1", "model":"assets/models/cow_001.mgcg", "format":"MGCG"},
+    {"id":"cow2", "model":"assets/models/cow_002.mgcg", "format":"MGCG"}
   ],
   "textures": [
     {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -218,6 +220,96 @@
       "transform":[1,0,0,-255.5,    0,1,0,78,     0,0,1,-236,     0,0,0,1] },
 
     { "id":"m", "model":"m", "texture":"t16",
-      "transform":[1,0,0,-3,    0,1,0,33,     0,0,1,-5,     0,0,0,1] }
+      "transform":[1,0,0,-3,    0,1,0,33,     0,0,1,-5,     0,0,0,1] },
+
+    { "id":"cow1", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow2", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow3", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow4", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow5", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow6", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow7", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow8", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow9", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow10", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow11", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow12", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow13", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow14", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow15", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow16", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow17", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow18", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow19", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow20", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow21", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow22", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow23", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow24", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow25", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow26", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow27", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow28", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow29", "model":"cow2", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"cow30", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] }
   ]
 }
