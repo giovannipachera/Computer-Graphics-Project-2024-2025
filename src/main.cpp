@@ -7,8 +7,12 @@
 #include "modules/LogoMaker.hpp"
 
 std::vector<SingleText> outText = {
-    {1, {" ", "", "", ""}, 0, 0},
-    {2, {"  ", "", "", ""}, 0, 0}};
+    {1, {"1. Find the plow and attach it to the tractor", "", "", ""}, 0, 0},
+    {2, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
+    {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0}};
+
+
+int currTextIndex = 0;
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 mvpMat;
@@ -59,7 +63,7 @@ protected:
   TextMaker txt;
   LogoMaker logo;
 
-  int currScene = 0;
+
   float Ar;
   glm::vec3 Pos;
   float Yaw;
@@ -68,6 +72,7 @@ protected:
   std::vector<std::string> tractorBodies = {"tbc", "tbb"};
   int currentBody = 0;
   int lastBody = -1;
+  int currScene = 0;
 
   AudioPlayer classicAudio;
   AudioPlayer barbieAudio;
@@ -84,6 +89,12 @@ protected:
     {"bl3", glm::vec3( 0.0f, 0.0f, 0.0f)}  // terza pala
   };
   std::vector<std::string> mill = {"m"};
+
+  std::vector<std::string> bear = {"bear"};
+
+  std::vector<std::string> dog = {"dog"};
+
+
   std::vector<Animal> horses = {
       {"hrs1", {6.0f, 0.5f, -110.0f}, 0.0f},
       {"hrs2", {20.0f, 0.5f, -100.0f}, -110.0f},
@@ -151,27 +162,23 @@ protected:
       {"cow24", {144.0f, 0.5f, 60.0f}, -50.0f},
       {"cow25", {190.0f, 0.5f, 50.0f}, -5.0f},
       {"cow26", {180.0f, 0.5f, 30.0f}, -130.0f},
-         {"cow27", {130.0f, 0.5f, 60.0f}, 90.0f},
+      {"cow27", {130.0f, 0.5f, 60.0f}, 90.0f},
       {"cow28", {175.0f, 0.5f, 55.0f}, -35.0f},
       {"cow29", {160.0f, 0.5f, 35.0f}, 170.0f},
-      {"cow30", {130.0f, 0.5f, 50.0f}, 240.0f}
-  };
+      {"cow30", {130.0f, 0.5f, 50.0f}, 240.0f}};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  std::vector<Animal> ducks = {
+    {"duck1", {146.0f, -0.5f, -135.0f}, 0.0f},
+    {"duck2", {160.0f, -0.5f, -135.0f}, -45.0f},
+    {"duck3", {135.0f, -0.5f, -135.0f}, 30.0f},
+    {"duck4", {134.0f, -0.5f, -150.0f}, -60.0f},
+    {"duck5", {180.0f, -0.5f, -145.0f}, -15.0f},
+    {"duck6", {170.0f, -0.5f, -125.0f}, -120.0f},
+    {"duck7", {120.0f, -0.5f, -155.0f}, 75.0f},
+    {"duck8", {165.0f, -0.5f, -150.0f}, -30.0f},
+    {"duck9", {150.0f, -0.5f, -130.0f}, 210.0f},
+    {"duck10", {120.0f, -0.5f, -145.0f}, 280.0f},
+    };
 
   std::unordered_set<int> tractorPartIdx;
   int tbIndex = -1;
@@ -267,6 +274,7 @@ protected:
       deltaA[i] = 0.0f;
       usePitch[i] = 0.0f;
     }
+
   }
 
   void pipelinesAndDescriptorSetsInit() {
@@ -298,11 +306,17 @@ protected:
   }
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
     P.bind(cb);
+
+
+
     SC.populateCommandBuffer(cb, currentImage, P);
+
 
     logo.populateCommandBuffer(cb, currentImage);
 
-    txt.populateCommandBuffer(cb, currentImage, currScene);
+    txt.populateCommandBuffer(cb, currentImage, currTextIndex);
+
+
   }
 
   void reRecordCommandBuffers() {
@@ -334,17 +348,31 @@ protected:
   void updateUniformBuffer(uint32_t currentImage) {
     float deltaT;
     glm::vec3 m(0), r(0);
-    bool fire = false, next = false, prev = false, horn = false;
-    getSixAxis(deltaT, m, r, fire, next, prev, horn);
+    bool fire = false, next = false, prev = false, horn = false, changeText = false;
+    getSixAxis(deltaT, m, r, fire, next, prev, horn, changeText);
 
     // Clamp del timestep per stabilità
     const float MAX_DELTA_T = 0.05f;
     if (deltaT > MAX_DELTA_T)
       deltaT = MAX_DELTA_T;
 
+
+    static bool prevT = false;
+    bool tPressed = changeText && !prevT;
+    prevT = changeText;
+
+    if (tPressed) {
+      currTextIndex = (currTextIndex + 1) % outText.size(); // cicla le scritte
+      txt.setText(currTextIndex);
+      refreshUIResources();
+    }
+
     static bool prevP = false;
     bool pPressed = next && !prevP;
     prevP = next;
+
+
+
 
     if (pPressed) {
       currentBody = (currentBody + 1) % (int)tractorBodies.size();
@@ -385,6 +413,8 @@ protected:
 
       lastBody = currentBody;
     }
+
+
 
 
     // Stato veicolo semplificato (invariato)
@@ -634,12 +664,15 @@ protected:
     for (const std::string &name : tractorPlow) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
+      glm::mat4 R90 = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0,1,0));
+
       if (plowAttached) {
         glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
         glm::mat4 localTr = glm::translate(glm::mat4(1.0f), plowOffset);
-        ubo.mMat = bodyTr * localTr * baseTr;
+
+        ubo.mMat = bodyTr * localTr *  baseTr;
       } else {
-        ubo.mMat = SC.I[i].Wm * baseTr;
+        ubo.mMat = SC.I[i].Wm * R90 * baseTr;
       }
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
@@ -749,10 +782,6 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-
-
-
-
     for (const auto &h : horses) {
       int i = SC.InstanceIds[h.id];
       glm::mat4 baseHr = baseFor(h.id);
@@ -767,6 +796,8 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
+
+    // ---------- CHICKENS ----------
 
     for (const auto &c : chickens) {
       int i = SC.InstanceIds[c.id];
@@ -783,6 +814,7 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
+    // ---------- COWS ----------
 
     for (const auto &h : cows) {
       int i = SC.InstanceIds[h.id];
@@ -795,6 +827,92 @@ for (const auto &b : blades) {
       ubo.mMat = transHr * rotY * rotZ * rotX * scaleHr * baseHr;
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // ---------- DOG ----------
+    for (const auto &d : dog) {
+      int i = SC.InstanceIds[d];        // ID dell'orso
+      glm::mat4 baseB = baseFor(d);     // base dal JSON
+
+      // Trasformazioni di orientamento e scala (simile agli altri animali)
+      glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotY = glm::mat4(1.0f); // puoi regolare se vuoi un'orientazione iniziale diversa
+      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f)); // scala a piacere
+      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(-95.0f, 0.5f, 95.0f)); // posizione iniziale
+
+      ubo.mMat = transB * rotY * rotZ * rotX * scaleB * baseB;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+    // ---------- BEAR ----------
+    for (const auto &b : bear) {
+      int i = SC.InstanceIds[b];        // ID dell'orso
+      glm::mat4 baseB = baseFor(b);     // base dal JSON
+
+      // Trasformazioni di orientamento e scala (simile agli altri animali)
+      glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
+      glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
+      glm::mat4 rotY = glm::mat4(1.0f); // puoi regolare se vuoi un'orientazione iniziale diversa
+      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f)); // scala a piacere
+      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(205.0f, 0.5f, -95.0f)); // posizione iniziale
+
+      ubo.mMat = transB * rotY * rotZ * rotX * scaleB * baseB;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
+      SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+      SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
+
+
+    // ---------- DUCKS: movimento sull'acqua ----------
+    static float duckTime = 0.0f;
+    duckTime += deltaT;
+
+    const float swimRadiusX = 2.0f;
+    const float swimRadiusZ = 3.5f;
+    const float bobAmp = 0.12f;
+    const float bobFreq = 2.5f;
+
+    for (size_t idx = 0; idx < ducks.size(); ++idx) {
+      int i = SC.InstanceIds[ducks[idx].id];
+      glm::mat4 baseD = baseFor(ducks[idx].id);
+
+      // centro di partenza
+      glm::vec3 center = ducks[idx].position;
+
+      // fase individuale (qui uso id per diversificare un po’)
+      float phase = static_cast<float>(idx) * 0.7f;
+
+      // calcola spostamento ellittico e bobbing
+      float t = duckTime + phase;
+      float dx = swimRadiusX * sin(t * 0.8f);
+      float dz = swimRadiusZ * cos(t * 0.72f);
+      float dy = bobAmp * sin(t * bobFreq);
+
+      glm::vec3 pos = center + glm::vec3(dx, dy, dz);
+
+      // direzione di movimento per rotazione
+      float heading = glm::degrees(atan2(-0.8f * swimRadiusX * cos(t * 0.8f),
+                                         -0.72f * swimRadiusZ * sin(t * 0.72f)));
+
+      glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+      glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1, 0, 0));
+      glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), glm::radians(heading), glm::vec3(0, 1, 0));
+      glm::mat4 scaleD = glm::scale(glm::mat4(1.0f), glm::vec3(6.0f));
+      glm::mat4 transD = glm::translate(glm::mat4(1.0f), pos);
+
+      ubo.mMat = transD * rotY * rotZ * rotX * scaleD * baseD;
+      ubo.mvpMat = ViewPrj * ubo.mMat;
+      ubo.nMat = glm::inverse(glm::transpose(ubo.mMat));
+
       SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }

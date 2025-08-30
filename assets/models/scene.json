@@ -7,7 +7,7 @@
     {"id":"f", "model":"assets/models/fender.gltf", "format":"GLTF"},
     {"id":"p", "model":"assets/models/plow.gltf", "format":"GLTF"},
     {"id":"pln", "model":"assets/models/LargePlane.obj",         "format":"OBJ"},
-    {"id":"prm", "model":"assets/models/environment.gltf", "format":"GLTF"},
+    {"id":"prm", "model":"assets/models/environment2.gltf", "format":"GLTF"},
     {"id":"hrs1", "model":"assets/models/horse_001.mgcg", "format":"MGCG"},
     {"id":"hrs2", "model":"assets/models/horse_002.mgcg", "format":"MGCG"},
     {"id":"hrs3", "model":"assets/models/horse_003.mgcg", "format":"MGCG"},
@@ -17,7 +17,11 @@
     {"id":"bl", "model":"assets/models/blade.gltf", "format":"GLTF"},
     {"id":"m", "model":"assets/models/mill.gltf", "format":"GLTF"},
     {"id":"cow1", "model":"assets/models/cow_001.mgcg", "format":"MGCG"},
-    {"id":"cow2", "model":"assets/models/cow_002.mgcg", "format":"MGCG"}
+    {"id":"cow2", "model":"assets/models/cow_002.mgcg", "format":"MGCG"},
+    {"id":"duck", "model":"assets/models/duck_001.mgcg", "format":"MGCG"},
+    {"id":"bear", "model":"assets/models/bear_001.mgcg", "format":"MGCG"},
+    {"id":"dog", "model":"assets/models/dog_004.mgcg", "format":"MGCG"}
+
   ],
   "textures": [
     {"id":"t0","texture":"assets/textures/body_classic_texture.png"},
@@ -88,7 +92,7 @@
       "transform":[1,0,0,-3.6,  0,1,0,-1.9,     0,0,1,2.15,   0,0,0,1] },
 
     { "id":"p", "model":"p", "texture":"t7",
-      "transform":[1,0,0,-100,  0,1,0,3,     0,0,1,0,   0,0,0,1] },
+      "transform":[1,0,0,-115,  0,1,0,1,     0,0,1,10,   0,0,0,1] },
 
     { "id":"pln", "model":"pln", "texture":"t5",
       "transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
@@ -310,6 +314,45 @@
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
 
     { "id":"cow30", "model":"cow1", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck1", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck1", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck2", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck3", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck4", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck5", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck6", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck7", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck8", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck9", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"duck10", "model":"duck", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"bear", "model":"bear", "texture":"t14",
+      "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },
+
+    { "id":"dog", "model":"dog", "texture":"t14",
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] }
   ]
 }

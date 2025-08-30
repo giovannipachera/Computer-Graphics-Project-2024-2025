@@ -1821,7 +1821,7 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 		}
 	}
 
-	void getSixAxis(float &deltaT, glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn) {
+	void getSixAxis(float &deltaT, glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn, bool &changeText) {
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		static float lastTime = 0.0f;
 
@@ -1886,6 +1886,8 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 		next = glfwGetKey(window, GLFW_KEY_P);
     	prev = glfwGetKey(window, GLFW_KEY_O);
 		fire = glfwGetKey(window, GLFW_KEY_SPACE) | (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
+    	changeText=glfwGetKey(window, GLFW_KEY_SPACE);
+
 		handleGamePad(GLFW_JOYSTICK_1,m,r,fire, next, prev, horn);
 		handleGamePad(GLFW_JOYSTICK_2,m,r,fire, next, prev, horn);
 		handleGamePad(GLFW_JOYSTICK_3,m,r,fire, next, prev, horn);
