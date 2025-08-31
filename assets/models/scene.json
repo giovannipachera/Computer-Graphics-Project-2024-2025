@@ -29,7 +29,6 @@
     {"id":"t2","texture":"assets/textures/front_wheel_classic_texture.png"},
     {"id":"t3","texture":"assets/textures/back_wheel_classic_texture.png"},
     {"id":"t4","texture":"assets/textures/fender_classic_texture.png"},
-    {"id":"t5","texture":"assets/textures/Porto.png"},
     {"id":"t6","texture":"assets/textures/textures.png"},
     {"id":"t7","texture":"assets/textures/plow_texture.png"},
     {"id":"t8","texture":"assets/textures/body_barbie_texture.png"},
@@ -93,9 +92,6 @@
 
     { "id":"p", "model":"p", "texture":"t7",
       "transform":[1,0,0,-115,  0,1,0,1.5,     0,0,1,10,   0,0,0,1] },
-
-    { "id":"pln", "model":"pln", "texture":"t5",
-      "transform":[20,0,0,0,   0,20,0,-0.1, 0,0,20,0,    0,0,0,1] },
 
     { "id":"prm", "model":"prm", "texture":"t6",
       "transform":[ 1,0,0, 0,  0,-1,0,26.8,  0,0,1,0,  0,0,0,1 ] },

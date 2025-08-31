@@ -1,19 +1,9 @@
-
-// TO MOVE
-#define JSON_DIAGNOSTICS 1
-#include "AudioPlayer.hpp"
 #include "modules/Starter.hpp"
 #include "modules/TextMaker.hpp"
 #include "modules/LogoMaker.hpp"
-
-std::vector<SingleText> outText = {
-    {1, {"1. Find the plow and attach it to the tractor", "", "", ""}, 0, 0},
-    {2, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
-    {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0},
-    {4, {"4. You've reached all of your goals!", "", "", ""},0, 0}};
-
-
-int currTextIndex = 0;
+#include "AudioPlayer.hpp"
+#include "WVP.hpp"
+#include <cmath>
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 mvpMat;
@@ -45,18 +35,23 @@ struct Animal {
   float rotY;
 };
 
-#include "WVP.hpp"
+std::vector<SingleText> outText = {
+  {1, {"1. Find the plow and attach it to the tractor", "", "", ""}, 0, 0},
+  {2, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
+  {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0},
+  {4, {"4. You've reached all of your goals!", "", "", ""},0, 0}};
+
+int currTextIndex = 0;
+
 #include "modules/Scene.hpp"
-#include <unordered_set>
-#include <cmath>
 
 class SIMULATOR : public BaseProject {
 protected:
-  DescriptorSetLayout DSL;
-  VertexDescriptor VD;
+  DescriptorSetLayout DSL; // Descrive quali risorse gli shader possono leggere
+  VertexDescriptor VD; //
   Pipeline P;
-
   Scene SC;
+
   glm::vec3 **deltaP;
   float *deltaA;
   float *usePitch;
@@ -64,41 +59,35 @@ protected:
   TextMaker txt;
   LogoMaker logo;
 
-
-  float Ar;
+  float Ar; // Aspect Ratio
   glm::vec3 Pos;
   float Yaw;
   glm::vec3 InitialPos;
 
+  int currentBody = 0; // Modello attuale di trattore (impostato inizialmente a Classic)
+  int lastBody = -1; // Usato per gestire lo switch di canzoni insieme ai trattori
+  bool LockText = true; // Usato per gestire la barra spaziatrice nel raggiungimento degli obiettivi
+
+  // File audio
+  AudioPlayer classicAudio; // Musichetta per il modello Classic
+  AudioPlayer barbieAudio; // Musichetta per il modello Barbie
+  AudioPlayer hornAudio; // Suono del clacson
+
+  // Istanze raggruppate per categoria
   std::vector<std::string> tractorBodies = {"tbc", "tbb"};
-  int currentBody = 0;
-  int lastBody = -1;
-  int currScene = 0;
-
-  bool LockText = true;
-
-
-  AudioPlayer classicAudio;
-  AudioPlayer barbieAudio;
-  AudioPlayer hornAudio;
-
   std::vector<std::string> tractorAxes = {"axc", "axb"};
   std::vector<std::string> tractorWheels = {"flwc", "frwc", "blwc", "brwc", "flwb", "frwb", "blwb", "brwb"};
   std::vector<std::string> tractorFenders = {"lfc", "rfc", "lfb", "rfb"};
   std::vector<std::string> tractorPlow = {"p"};
-  std::vector<std::string> tractorScene = {"pln", "prm"};
+  std::vector<std::string> tractorScene = {"prm"};
   std::vector<Blade> blades = {
-    {"bl1", glm::vec3(0.0f, 0.0f, 0.0f)},  // prima pala
-    {"bl2", glm::vec3( 0.0f, 0.0f, 0.0f)},  // seconda pala
-    {"bl3", glm::vec3( 0.0f, 0.0f, 0.0f)}  // terza pala
+    {"bl1", glm::vec3(0.0f, 0.0f, 0.0f)},  // Eliche della prima pala eolica
+    {"bl2", glm::vec3( 0.0f, 0.0f, 0.0f)},  // Eliche della seconda pala eolica
+    {"bl3", glm::vec3( 0.0f, 0.0f, 0.0f)}  // Eliche della terza pala eolica
   };
   std::vector<std::string> mill = {"m"};
-
   std::vector<std::string> bear = {"bear"};
-
   std::vector<std::string> dog = {"dog"};
-
-
   std::vector<Animal> horses = {
       {"hrs1", {6.0f, 0.5f, -110.0f}, 0.0f},
       {"hrs2", {20.0f, 0.5f, -100.0f}, -110.0f},
@@ -138,7 +127,6 @@ protected:
       {"chk24", {-118.0f, 0.5f, -60.0f}, -10.0f},
       {"chk25", {-112.0f, 0.5f, -42.0f}, -90.0f},
       {"chk26", {-90.0f, 0.5f, -40.0f}, 30.0f}};
-
   std::vector<Animal> cows = {
       {"cow1", {156.0f, 0.5f, 110.0f}, 0.0f},
       {"cow2", {170.0f, 0.5f, 100.0f}, -45.0f},
@@ -170,7 +158,6 @@ protected:
       {"cow28", {175.0f, 0.5f, 55.0f}, -35.0f},
       {"cow29", {160.0f, 0.5f, 35.0f}, 170.0f},
       {"cow30", {130.0f, 0.5f, 50.0f}, 240.0f}};
-
   std::vector<Animal> ducks = {
     {"duck1", {146.0f, -0.5f, -135.0f}, 0.0f},
     {"duck2", {160.0f, -0.5f, -135.0f}, -45.0f},
@@ -184,8 +171,7 @@ protected:
     {"duck10", {120.0f, -0.5f, -145.0f}, 280.0f},
     };
 
-  std::unordered_set<int> tractorPartIdx;
-  int tbIndex = -1;
+  // Usati per l'unione dell'istanza dell'aratro con quella del corpo del trattore
   int plowIndex = -1;
   bool plowAttached = false;
   glm::vec3 plowOffset = glm::vec3(0.0f);
@@ -199,10 +185,12 @@ protected:
     uniformBlocksInPool = 64;
     texturesInPool = 64;
     setsInPool = 64;
-    Ar = 4.0f / 3.0f;
+    Ar = 4.0f / 3.0f; // Aspect Ratio
   }
 
+  // Ricalcolo di Aspect Radio quando si cambia la dimensione della finestra
   void onWindowResize(int w, int h) { Ar = (float)w / (float)h; }
+
 
   void localInit() {
     DSL.init(
@@ -242,27 +230,6 @@ protected:
     classicAudio.play();
     lastBody = currentBody;
 
-    // Indici utili
-    tractorPartIdx.insert(SC.InstanceIds["tbc"]);
-    tractorPartIdx.insert(SC.InstanceIds["tbb"]);
-    tractorPartIdx.insert(SC.InstanceIds["axc"]);
-    tractorPartIdx.insert(SC.InstanceIds["axb"]);
-    tractorPartIdx.insert(SC.InstanceIds["flwc"]);
-    tractorPartIdx.insert(SC.InstanceIds["frwc"]);
-    tractorPartIdx.insert(SC.InstanceIds["blwc"]);
-    tractorPartIdx.insert(SC.InstanceIds["brwc"]);
-    tractorPartIdx.insert(SC.InstanceIds["flwb"]);
-    tractorPartIdx.insert(SC.InstanceIds["frwb"]);
-    tractorPartIdx.insert(SC.InstanceIds["blwb"]);
-    tractorPartIdx.insert(SC.InstanceIds["brwb"]);
-    tractorPartIdx.insert(SC.InstanceIds["lfc"]);
-    tractorPartIdx.insert(SC.InstanceIds["rfc"]);
-    tractorPartIdx.insert(SC.InstanceIds["lfb"]);
-    tractorPartIdx.insert(SC.InstanceIds["rfb"]);
-    tractorPartIdx.insert(SC.InstanceIds["p"]);
-    plowIndex = SC.InstanceIds["p"];
-
-
     // Pos del corpo: gestita da codice (non dal JSON)
     Pos = glm::vec3(-50.0f, 3.45f, 0.0f);
     InitialPos = Pos;
@@ -279,7 +246,6 @@ protected:
       deltaA[i] = 0.0f;
       usePitch[i] = 0.0f;
     }
-
   }
 
   void pipelinesAndDescriptorSetsInit() {
@@ -458,14 +424,10 @@ protected:
         barbieAudio.play();
 
       logo.setCurrentLogo(currentBody);
-      currScene = currentBody;
       refreshUIResources();
 
       lastBody = currentBody;
     }
-
-
-
 
     // Stato veicolo semplificato (invariato)
     static float SteeringAng = 0.0f;
