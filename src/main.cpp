@@ -9,7 +9,8 @@
 std::vector<SingleText> outText = {
     {1, {"1. Find the plow and attach it to the tractor", "", "", ""}, 0, 0},
     {2, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
-    {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0}};
+    {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0},
+    {4, {"4. You've reached all of your goals!", "", "", ""},0, 0}};
 
 
 int currTextIndex = 0;
