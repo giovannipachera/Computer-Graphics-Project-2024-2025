@@ -74,6 +74,9 @@ protected:
   int lastBody = -1;
   int currScene = 0;
 
+  bool LockText = true;
+
+
   AudioPlayer classicAudio;
   AudioPlayer barbieAudio;
   AudioPlayer hornAudio;
@@ -258,6 +261,7 @@ protected:
     tractorPartIdx.insert(SC.InstanceIds["p"]);
     plowIndex = SC.InstanceIds["p"];
 
+
     // Pos del corpo: gestita da codice (non dal JSON)
     Pos = glm::vec3(-50.0f, 3.45f, 0.0f);
     InitialPos = Pos;
@@ -357,15 +361,60 @@ protected:
       deltaT = MAX_DELTA_T;
 
 
+    // Logic of last goal
+    glm::vec3 bearPos = glm::vec3(205.0f, 0.5f, -95.0f);
+
+
+    bool bearNear;
+
+    float distToBear = glm::length(Pos - bearPos);
+
+    if (distToBear < 20.0f) {  // soglia in metri/unità di mondo
+      bearNear = true;
+      LockText=false;
+
+
+    } else {
+      bearNear = false;
+    }
+
+    /////////////////////////////////
+
+    // Logic of last goal
+    glm::vec3 dogPos = glm::vec3(-95.0f, 0.5f, 95.0f);
+
+
+    bool dogNear;
+
+    float distToDog = glm::length(Pos - dogPos);
+
+    if (distToDog < 15.0f) {  // soglia in metri/unità di mondo
+      dogNear = true;
+      LockText=false;
+
+
+
+    } else {
+      dogNear = false;
+    }
+
+    /////////////////////////////////
+
+
     static bool prevT = false;
     bool tPressed = changeText && !prevT;
     prevT = changeText;
 
-    if (tPressed) {
+    if (tPressed && !LockText) {
+      LockText=true;
+
+
       currTextIndex = (currTextIndex + 1) % outText.size(); // cicla le scritte
       txt.setText(currTextIndex);
       refreshUIResources();
     }
+
+
 
     static bool prevP = false;
     bool pPressed = next && !prevP;
@@ -463,6 +512,12 @@ protected:
       }
     }
 
+
+
+
+
+
+
     // Attacca strozapaglia (plow) quando vicino e premi "fire"
     static bool prevFire = false;
     bool firePressed = fire && !prevFire;
@@ -472,6 +527,8 @@ protected:
       glm::vec3 plowWorldPos = glm::vec3(SC.I[plowIndex].Wm[3]);
       if (glm::length(plowWorldPos - Pos) < 5.0f) {
         plowAttached = true;
+        LockText=false;
+
         plowOffset =
             glm::vec3(glm::rotate(glm::mat4(1.0f), -Yaw, glm::vec3(0, 1, 0)) *
                       glm::vec4(plowWorldPos - Pos, 0.0f));

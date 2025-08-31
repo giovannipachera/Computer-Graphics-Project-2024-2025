@@ -1782,7 +1782,7 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 
 
 	// Control Wrapper
-	void handleGamePad(int id,  glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn) {
+	void handleGamePad(int id,  glm::vec3 &m, glm::vec3 &r, bool &fire, bool &next, bool &prev, bool &horn, bool &changeText) {
 		const float deadZone = 0.1f;
 
 		if(glfwJoystickIsGamepad(id)) {
@@ -1817,6 +1817,7 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 				prev = prev | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_SQUARE];
 				next = next | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_CIRCLE];
 				fire = fire | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_CROSS];
+				changeText = changeText | (bool)state.buttons[GLFW_GAMEPAD_BUTTON_CROSS];
 			}
 		}
 	}
@@ -1888,10 +1889,10 @@ std::cout << "Starting createInstance()\n"  << std::flush;
 		fire = glfwGetKey(window, GLFW_KEY_SPACE) | (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
     	changeText=glfwGetKey(window, GLFW_KEY_SPACE);
 
-		handleGamePad(GLFW_JOYSTICK_1,m,r,fire, next, prev, horn);
-		handleGamePad(GLFW_JOYSTICK_2,m,r,fire, next, prev, horn);
-		handleGamePad(GLFW_JOYSTICK_3,m,r,fire, next, prev, horn);
-		handleGamePad(GLFW_JOYSTICK_4,m,r,fire, next, prev, horn);
+		handleGamePad(GLFW_JOYSTICK_1,m,r,fire, next, prev, horn, changeText);
+		handleGamePad(GLFW_JOYSTICK_2,m,r,fire, next, prev, horn, changeText);
+		handleGamePad(GLFW_JOYSTICK_3,m,r,fire, next, prev, horn, changeText);
+		handleGamePad(GLFW_JOYSTICK_4,m,r,fire, next, prev, horn, changeText);
 	}
 
 	// Public part of the base class
