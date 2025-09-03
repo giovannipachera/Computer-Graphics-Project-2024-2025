@@ -4,90 +4,108 @@
 #include "AudioPlayer.hpp"
 #include "WVP.hpp"
 #include <cmath>
+#include <thread>
 
+// Strutture dati per la comunicazione con gli shader Vulkan
+// UBO che contiene le matrici di trasformazione, utilizzato per trasformare i vertici dallo spazio locale allo spazio schermo
 struct UniformBufferObject {
-  alignas(16) glm::mat4 mvpMat;
-  alignas(16) glm::mat4 mMat;
-  alignas(16) glm::mat4 nMat;
+  alignas(16) glm::mat4 mvpMat; // Matrice Model-View-Projection per la trasformazione finale
+  alignas(16) glm::mat4 mMat; // Matrice Model per  posizionare l'oggetto nel mondo
+  alignas(16) glm::mat4 nMat; // Matrice Normal per calcolare l'illuminazione corretta
 };
 
+// GUBO per parametri di illuminazione e camera, condiviso tra tutti gli oggetti della scena per mantenere consistenza visiva
 struct GlobalUniformBufferObject {
-  alignas(16) glm::vec3 lightDir;
-  alignas(16) glm::vec4 lightColor;
-  alignas(16) glm::vec3 eyePos;
-  alignas(16) glm::vec4 eyeDir;
+  alignas(16) glm::vec3 lightDir; // Direzione della luce principale (sole)
+  alignas(16) glm::vec4 lightColor; // Colore e intensità della luce
+  alignas(16) glm::vec3 eyePos; // Posizione della camera nello spazio mondo
+  alignas(16) glm::vec4 eyeDir; // Direzione di vista della camera
 };
 
+// Struttura vertex che che definisce la geometria di ogni punto del modello 3D, compatibilmente con il formato dei gile importati
 struct Vertex {
-  glm::vec3 pos;
-  glm::vec2 UV;
-  glm::vec3 norm;
+  glm::vec3 pos; // Posizione 3D del vertice nello spazio locale
+  glm::vec2 UV; // Coordinate texture per il mapping delle immagini
+  glm::vec3 norm; // Vettore normale per il calcolo dell'illuminazione
 };
 
+// Struttura per rappresentare le pale eoliche nel mondo di gioco
 struct Blade {
-  std::string id;
-  glm::vec3 position;
+  std::string id; // Identificativo univoco della pala
 };
 
+// Struttura generica per rappresentare gli animali nella fattoria
 struct Animal {
-  std::string id;
-  glm::vec3 position;
-  float rotY;
+  std::string id; // Identificativo univoco dell'animale nella scena
+  glm::vec3 position; // Posizione dell'animale nel mondo di gioco
+  float rotY; // Orientamento calcolato ruotando in gradi sull'asse Y
 };
 
+// Obiettivi di gioco che il giocatore deve completare in ordine
+int currTextIndex = 0; // Indice dell'obiettivo corrente
+// Testi degli obiettivi
 std::vector<SingleText> outText = {
   {1, {"1. Find the plow and attach it to the tractor", "", "", ""}, 0, 0},
-  {2, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
-  {3, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0},
-  {4, {"4. You've reached all of your goals!", "", "", ""},0, 0}};
-
-int currTextIndex = 0;
+  {1, {"2. Fuffy loves the horn! Find him and play it  ", "", "", ""}, 0, 0},
+  {1, {"3. Last Goal!!! Find the bear", "", "", ""},0, 0},
+  {1, {"4. You've reached all of your goals!", "", "", ""},0, 0}};
 
 #include "modules/Scene.hpp"
 
 class SIMULATOR : public BaseProject {
 protected:
-  DescriptorSetLayout DSL; // Descrive quali risorse gli shader possono leggere
-  VertexDescriptor VD; //
-  Pipeline P;
-  Scene SC;
+  // Componenti Vulkan per il rendering
+  DescriptorSetLayout DSL; // Layout che descrive a quali risorse (texture, buffer) gli shader possono accedere
+  VertexDescriptor VD; // Descrittore del formato dei vertici (posizioni, UV, normali)
+  Pipeline P; // Pipeline grafica che definisce come vengono renderizzati i modelli
+  Scene SC; // Gestore della scena che carica e organizza tutti i modelli
 
-  glm::vec3 **deltaP;
-  float *deltaA;
-  float *usePitch;
+  // Componenenti dell'interfaccia utente
+  TextMaker txt; // Sistema per renderizzare il testo sullo schermo
+  LogoMaker logo; // Sistema per renderizzare il logo sullo schermo
 
-  TextMaker txt;
-  LogoMaker logo;
+  // Stato della camera e del mondo
+  float Ar; // Aspect Ratio della finestra (larghezza/altezza)
+  glm::vec3 Pos; // Posizione corrente del trattore nel mondo
+  float Yaw; // Rotazione del trattore sull'asse Y
 
-  float Ar; // Aspect Ratio
-  glm::vec3 Pos;
-  float Yaw;
-  glm::vec3 InitialPos;
+  // Stato del trattore
+  glm::vec3 **deltaP; // Traslazione della istanza letta da JSON
+  int currentBody = 0; // Modello di trattore attualmente selezionato (0: Classic, 1: Barbie)
+  int lastBody = -1; // Ultimo modello selezionato (per gestire cambi audio)
 
-  int currentBody = 0; // Modello attuale di trattore (impostato inizialmente a Classic)
-  int lastBody = -1; // Usato per gestire lo switch di canzoni insieme ai trattori
-  bool LockText = true; // Usato per gestire la barra spaziatrice nel raggiungimento degli obiettivi
+  // Gestione della barra spaziatrice per cambiare obiettivo
+  bool LockText = true;
 
-  // File audio
+  // Sistema audio
   AudioPlayer classicAudio; // Musichetta per il modello Classic
   AudioPlayer barbieAudio; // Musichetta per il modello Barbie
   AudioPlayer hornAudio; // Suono del clacson
 
   // Istanze raggruppate per categoria
+  // Corpi dei due modelli
   std::vector<std::string> tractorBodies = {"tbc", "tbb"};
+  // Assi delle ruote frontali dei due modelli
   std::vector<std::string> tractorAxes = {"axc", "axb"};
+  // Ruote frontali e posteriori dei due modelli
   std::vector<std::string> tractorWheels = {"flwc", "frwc", "blwc", "brwc", "flwb", "frwb", "blwb", "brwb"};
+  // Parafanghi dei due modelli
   std::vector<std::string> tractorFenders = {"lfc", "rfc", "lfb", "rfb"};
+  // Aratro
   std::vector<std::string> tractorPlow = {"p"};
-  std::vector<std::string> tractorScene = {"prm"};
+  // Eliche delle pale eoliche
   std::vector<Blade> blades = {
-    {"bl1", glm::vec3(0.0f, 0.0f, 0.0f)},  // Eliche della prima pala eolica
-    {"bl2", glm::vec3( 0.0f, 0.0f, 0.0f)},  // Eliche della seconda pala eolica
-    {"bl3", glm::vec3( 0.0f, 0.0f, 0.0f)}  // Eliche della terza pala eolica
+    {"bl1"},  // Prima pala eolica
+    {"bl2"},  // Seconda pala eolica
+    {"bl3"}  // Terza pala eolica
   };
+  // Eliche del mulino
   std::vector<std::string> mill = {"m"};
+  // Orso
   std::vector<std::string> bear = {"bear"};
+  // Cane
   std::vector<std::string> dog = {"dog"};
+  // Cavalli
   std::vector<Animal> horses = {
       {"hrs1", {6.0f, 0.5f, -110.0f}, 0.0f},
       {"hrs2", {20.0f, 0.5f, -100.0f}, -110.0f},
@@ -100,6 +118,7 @@ protected:
       {"hrs9", {10.0f, 0.5f, -95.0f}, 210.0f},
       {"hrs10", {-20.0f, 0.5f, -110.0f}, 280.0f},
       {"hrs11", {-18.0f, 0.5f, -90.0f}, 186.0f}};
+  // Galline
   std::vector<Animal> chickens = {
       {"chk1", {-108.0f, 0.5f, -35.0f}, 0.0f},
       {"chk2", {-106.0f, 0.5f, -47.0f}, -110.0f},
@@ -127,6 +146,7 @@ protected:
       {"chk24", {-118.0f, 0.5f, -60.0f}, -10.0f},
       {"chk25", {-112.0f, 0.5f, -42.0f}, -90.0f},
       {"chk26", {-90.0f, 0.5f, -40.0f}, 30.0f}};
+  // Mucche
   std::vector<Animal> cows = {
       {"cow1", {156.0f, 0.5f, 110.0f}, 0.0f},
       {"cow2", {170.0f, 0.5f, 100.0f}, -45.0f},
@@ -158,6 +178,7 @@ protected:
       {"cow28", {175.0f, 0.5f, 55.0f}, -35.0f},
       {"cow29", {160.0f, 0.5f, 35.0f}, 170.0f},
       {"cow30", {130.0f, 0.5f, 50.0f}, 240.0f}};
+  // Papere
   std::vector<Animal> ducks = {
     {"duck1", {146.0f, -0.5f, -135.0f}, 0.0f},
     {"duck2", {160.0f, -0.5f, -135.0f}, -45.0f},
@@ -169,85 +190,97 @@ protected:
     {"duck8", {165.0f, -0.5f, -150.0f}, -30.0f},
     {"duck9", {150.0f, -0.5f, -130.0f}, 210.0f},
     {"duck10", {120.0f, -0.5f, -145.0f}, 280.0f},
-    };
+  };
+  // Ambientazione
+  std::vector<std::string> tractorScene = {"prm"};
 
-  // Usati per l'unione dell'istanza dell'aratro con quella del corpo del trattore
-  int plowIndex = -1;
-  bool plowAttached = false;
-  glm::vec3 plowOffset = glm::vec3(0.0f);
+  // Sistema di attacco dell'aratro
+  int plowIndex = -1; // Indice dell'aratro nella scena
+  bool plowAttached = false; // Flag che indica se l'aratro è attaccato al trattore
+  glm::vec3 plowOffset = glm::vec3(0.0f); // Offset dell'aratro rispetto al centro del trattore
 
+  // Condizione iniziale della finestra di gioco
   void setWindowParameters() {
-    windowWidth = 800;
-    windowHeight = 600;
-    windowTitle = "Country Roads";
-    windowResizable = GLFW_TRUE;
-    initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f};
-    uniformBlocksInPool = 64;
-    texturesInPool = 64;
-    setsInPool = 64;
-    Ar = 4.0f / 3.0f; // Aspect Ratio
+    windowWidth = 800; // Larghezza
+    windowHeight = 600; // Altezza
+    windowTitle = "Country Roads"; // Titolo
+    windowResizable = GLFW_TRUE; // Ridimensionabilità
+    initialBackgroundColor = {0.4f, 0.8f, 1.0f, 1.0f}; // Colore del cielo
+    uniformBlocksInPool = 64; // Numero massimo di Uniform Blocks nel pool
+    texturesInPool = 64; // Numero massimo di Texture nel pool
+    setsInPool = 64; // Numero massimo descriptor set nel pool
+    Ar = 4.0f / 3.0f; // Aspect Ratio iniziale
   }
 
-  // Ricalcolo di Aspect Radio quando si cambia la dimensione della finestra
+  // Ricalcolo di Aspect Ratio quando si cambia la dimensione della finestra
   void onWindowResize(int w, int h) { Ar = (float)w / (float)h; }
 
-
+  // Inizializzazione completa di tutte le risorse Vulkan e degli oggetti di gioco
   void localInit() {
+    //Inizializzazione del Descriptor Set Layout: quali tipi di risorse (buffer, texture) gli shader possono utilizzare
     DSL.init(
         this,
-        {{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-         {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        {{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}, // Binding 0: slot UBO
+         {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, // Binding 1: slot textures
           VK_SHADER_STAGE_FRAGMENT_BIT},
-         {2, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}});
+         {2, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}}); // Binding 2: slot GUBO (luce e camera)
 
-    VD.init(this, {{0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX}},
-            {{0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, pos),
+    // Inizializzazione del Vertex Descriptor: definisce il formato dei vertici (come sono strutturati i dati geometrici)
+    VD.init(this, {{0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX}}, // Binding 0: un Vertex per vertice
+            {{0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, pos), // Posizione 3D
               sizeof(glm::vec3), POSITION},
-             {0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, UV),
+             {0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, UV), // Coordinate texture
               sizeof(glm::vec2), UV},
-             {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, norm),
+             {0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, norm), // Vettore normale
               sizeof(glm::vec3), NORMAL}});
 
+    // Inizializzazione della Pipeline: carica e configura gli shader per il rendering con illuminazione Phong
     P.init(this, &VD, "shaders/PhongVert.spv", "shaders/PhongFrag.spv", {&DSL});
-    P.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, VK_POLYGON_MODE_FILL,
-                          VK_CULL_MODE_NONE, false);
+    P.setAdvancedFeatures(VK_COMPARE_OP_LESS_OR_EQUAL, // Test profondità less-or-equal
+                          VK_POLYGON_MODE_FILL, // Riempie i poligoni
+                          VK_CULL_MODE_NONE, // Non elimina le facce (mostra fronte e retro)
+                          false); // Non abilita blending
 
-    // Carica scena
-    SC.init(this, &VD, DSL, P, "assets/models/scene.json");
-    txt.init(this, &outText);
-    logo.init(this);
+    // Caricamento della scena e inizializzazione dell'UI
+    SC.init(this, &VD, DSL, P, "assets/models/scene.json"); // Modelli 3D
+    txt.init(this, &outText); // Sistema del testo
+    logo.init(this); // Sistema del logo
 
+    // Caricamento dei file di audio
     #ifdef _WIN32
     classicAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\classic.wav", true);
     barbieAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\barbie.wav", true);
-    hornAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\horn.wav", true);
+    hornAudio.load("C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\horn.wav", false);
     #else
     classicAudio.load("assets/audio/classic.wav", true);
     barbieAudio.load("assets/audio/barbie.wav", true);
-    hornAudio.load("assets/audio/horn.wav", true);
+    hornAudio.load("assets/audio/horn.wav", false);
     #endif
 
-    classicAudio.play();
-    lastBody = currentBody;
+    // Avvio della traccia audio all'inizio della simulazione
+    classicAudio.play(); // Inizio con la musica del trattore classico
+    lastBody = currentBody; // Sincronizza stato audio
 
-    // Pos del corpo: gestita da codice (non dal JSON)
-    Pos = glm::vec3(-50.0f, 3.45f, 0.0f);
-    InitialPos = Pos;
-    Yaw = 0.0f;
+    // Posizione iniziale del trattore
+    Pos = glm::vec3(-50.0f, 3.45f, 130.0f); // Posizione
+    Yaw = glm::radians(180.0f); // Orientamento
 
     // Offset letti dal JSON (RELATIVI al corpo)
     deltaP = (glm::vec3 **)calloc(SC.InstanceCount, sizeof(glm::vec3 *));
-    deltaA = (float *)calloc(SC.InstanceCount, sizeof(float));
-    usePitch = (float *)calloc(SC.InstanceCount, sizeof(float));
 
+    // Ricerca dell'indice dell'aratro nella scena
+    if (SC.InstanceIds.count("p")) {
+      plowIndex = SC.InstanceIds["p"];
+    }
+
+    // Estrazione di deltaP per ogni istanza
     for (int i = 0; i < SC.InstanceCount; ++i) {
       deltaP[i] = new glm::vec3(
           glm::vec3(SC.I[i].Wm[3])); // estrai solo la traduzione dal JSON
-      deltaA[i] = 0.0f;
-      usePitch[i] = 0.0f;
     }
   }
 
+  // Creazione di pipeline e descriptor set dopo l'inizializzazione del device
   void pipelinesAndDescriptorSetsInit() {
     P.create();
     SC.pipelinesAndDescriptorSetsInit(DSL);
@@ -264,8 +297,6 @@ protected:
     for (int i = 0; i < SC.InstanceCount; ++i)
       delete deltaP[i];
     free(deltaP);
-    free(deltaA);
-    free(usePitch);
     classicAudio.stop(true);
     barbieAudio.stop(true);
     hornAudio.stop(true);
@@ -275,19 +306,12 @@ protected:
     txt.localCleanup();
     logo.localCleanup();
   }
+
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
     P.bind(cb);
-
-
-
     SC.populateCommandBuffer(cb, currentImage, P);
-
-
     logo.populateCommandBuffer(cb, currentImage);
-
     txt.populateCommandBuffer(cb, currentImage, currTextIndex);
-
-
   }
 
   void reRecordCommandBuffers() {
@@ -403,6 +427,7 @@ protected:
                     (int)tractorBodies.size();
     }
 
+    /*
     static bool prevK = false;
     bool kPressed = horn && !prevK;
     prevK = horn;
@@ -412,11 +437,52 @@ protected:
       hornAudio.stop(false);
     }
 
+    */
+
+    static bool prevK = false;
+    bool kPressed = horn && !prevK;
+    prevK = horn;
+
+#ifdef _WIN32
+      static bool hornCooldown = false;
+      static float hornTimer = 0.0f;
+
+      if (kPressed && !hornCooldown) {
+
+      std::cout << "[DEBUG] Clacson - PowerShell ottimizzato" << std::endl;
+      // Comando PowerShell più veloce (senza Start-Sleep)
+      std::string hornPath = "C:\\Users\\admin\\Desktop\\Computer Graphic project\\Computer-Graphics-Project-2024-2025\\assets\\audio\\horn.wav";
+      std::string cmd = "powershell -WindowStyle Hidden -NoProfile -Command \"[System.Media.SoundPlayer]::new('" + hornPath + "').PlaySync()\"";
+
+      // Avvia il comando in background
+      std::thread([cmd]() {
+          std::system(cmd.c_str());
+      }).detach();
+
+      hornCooldown = true;
+      hornTimer = 1.0f;
+    }
+
+    // Gestione cooldown
+    if (hornCooldown) {
+      hornTimer -= deltaT;
+      if (hornTimer <= 0.0f) {
+        hornCooldown = false;
+      }
+    }
+#else
+    if (kPressed) {
+      hornAudio.play();
+      hornAudio.stop(false);
+    }
+#endif
+
+
     if (currentBody != lastBody) {
       if (lastBody == 0)
-        classicAudio.stop(false);
+        classicAudio.stop(true);
       else if (lastBody == 1)
-        barbieAudio.stop(false);
+        barbieAudio.stop(true);
 
       if (currentBody == 0)
         classicAudio.play();
@@ -474,12 +540,6 @@ protected:
           SteeringAng = 0.0f;
       }
     }
-
-
-
-
-
-
 
     // Attacca strozapaglia (plow) quando vicino e premi "fire"
     static bool prevFire = false;
