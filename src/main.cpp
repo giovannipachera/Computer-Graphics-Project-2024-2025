@@ -417,9 +417,6 @@ protected:
     prevK = horn;
 
 #ifdef _WIN32
-      static bool hornCooldown = false;
-      static float hornTimer = 0.0f;
-
       if (kPressed && !hornCooldown) {
 
       std::cout << "[DEBUG] Clacson - PowerShell ottimizzato" << std::endl;
@@ -431,17 +428,6 @@ protected:
       std::thread([cmd]() {
           std::system(cmd.c_str());
       }).detach();
-
-      hornCooldown = true;
-      hornTimer = 1.0f;
-    }
-
-    // Gestione cooldown
-    if (hornCooldown) {
-      hornTimer -= deltaT;
-      if (hornTimer <= 0.0f) {
-        hornCooldown = false;
-      }
     }
 #else
     if (kPressed) {
@@ -488,7 +474,7 @@ protected:
 
     wheelRoll = fmod(wheelRoll - dampedVel / 0.4f + 2 * M_PI, 2 * M_PI);
 
-    // Cinematica semplice
+    // Cinematica
     if (dampedVel != 0.0f) {
       if (SteeringAng != 0.0f) {
         const float l = 2.78f;
