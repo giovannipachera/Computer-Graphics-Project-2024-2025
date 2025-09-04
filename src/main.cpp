@@ -276,23 +276,27 @@ protected:
     // Estrazione di deltaP per ogni istanza
     for (int i = 0; i < SC.InstanceCount; ++i) {
       deltaP[i] = new glm::vec3(
-          glm::vec3(SC.I[i].Wm[3])); // estrai solo la traduzione dal JSON
+          glm::vec3(SC.I[i].Wm[3])); // estrai solo la traslazione dal JSON
     }
   }
 
-  // Creazione di pipeline e descriptor set dopo l'inizializzazione del device
+  // Inizializzazione di Pipeline e Descriptor Set
   void pipelinesAndDescriptorSetsInit() {
     P.create();
     SC.pipelinesAndDescriptorSetsInit(DSL);
     txt.pipelinesAndDescriptorSetsInit();
     logo.pipelinesAndDescriptorSetsInit();
   }
+
+  // Cleanup di Pipeline e Descriptor Set
   void pipelinesAndDescriptorSetsCleanup() {
     P.cleanup();
     SC.pipelinesAndDescriptorSetsCleanup();
     txt.pipelinesAndDescriptorSetsCleanup();
     logo.pipelinesAndDescriptorSetsCleanup();
   }
+
+  // Cleanup locale di tutte le risorse
   void localCleanup() {
     for (int i = 0; i < SC.InstanceCount; ++i)
       delete deltaP[i];
@@ -307,13 +311,15 @@ protected:
     logo.localCleanup();
   }
 
+  // Inserimento nel command buffer per il rendering
   void populateCommandBuffer(VkCommandBuffer cb, int currentImage) {
-    P.bind(cb);
+    P.bind(cb); // Lega la pipeline grafica al command buffer cb
     SC.populateCommandBuffer(cb, currentImage, P);
     logo.populateCommandBuffer(cb, currentImage);
     txt.populateCommandBuffer(cb, currentImage, currTextIndex);
   }
 
+  // Registra nuovamente i command buffer (necessario dopo cambiiamenti)
   void reRecordCommandBuffers() {
     vkDeviceWaitIdle(device);
     vkFreeCommandBuffers(device, commandPool,
@@ -322,6 +328,7 @@ protected:
     createCommandBuffers();
   }
 
+  // Refresh delle risorse UI dopo cambiamenti
   void refreshUIResources() {
     logo.pipelinesAndDescriptorSetsCleanup();
     txt.pipelinesAndDescriptorSetsCleanup();
@@ -331,7 +338,7 @@ protected:
     reRecordCommandBuffers();
   }
 
-  // Correzione SOLO per 'prm' (GLTF Z-up) → mondo Y-up. OBJ (pln) invariato.
+  // Matrice di base per correggere l'orientamento dei modelli
   glm::mat4 baseFor(const std::string &id) {
     if (id == "prm") {
       return glm::rotate(glm::mat4(1.0f), glm::half_pi<float>(),
@@ -340,57 +347,41 @@ protected:
     return glm::mat4(1.0f);
   }
 
+  // Aggiornamento degli UBO per ogni frame
   void updateUniformBuffer(uint32_t currentImage) {
     float deltaT;
-    glm::vec3 m(0), r(0);
+    glm::vec3 m(0), r(0); // Movimento e rotazione
     bool fire = false, next = false, prev = false, horn = false, changeText = false;
     getSixAxis(deltaT, m, r, fire, next, prev, horn, changeText);
 
-    // Clamp del timestep per stabilità
+    // Limitazione del timestep per evitare salti troppo grandi
     const float MAX_DELTA_T = 0.05f;
     if (deltaT > MAX_DELTA_T)
       deltaT = MAX_DELTA_T;
 
 
-    // Logic of last goal
+    // Logica degli obiettivi
     glm::vec3 bearPos = glm::vec3(205.0f, 0.5f, -95.0f);
-
-
     bool bearNear;
-
     float distToBear = glm::length(Pos - bearPos);
 
     if (distToBear < 20.0f) {  // soglia in metri/unità di mondo
       bearNear = true;
       LockText=false;
-
-
     } else {
       bearNear = false;
     }
 
-    /////////////////////////////////
-
-    // Logic of last goal
     glm::vec3 dogPos = glm::vec3(-95.0f, 0.5f, 95.0f);
-
-
     bool dogNear;
-
     float distToDog = glm::length(Pos - dogPos);
 
     if (distToDog < 15.0f) {  // soglia in metri/unità di mondo
       dogNear = true;
       LockText=false;
-
-
-
     } else {
       dogNear = false;
     }
-
-    /////////////////////////////////
-
 
     static bool prevT = false;
     bool tPressed = changeText && !prevT;
@@ -399,20 +390,14 @@ protected:
     if (tPressed && !LockText) {
       LockText=true;
 
-
       currTextIndex = (currTextIndex + 1) % outText.size(); // cicla le scritte
       txt.setText(currTextIndex);
       refreshUIResources();
     }
 
-
-
     static bool prevP = false;
     bool pPressed = next && !prevP;
     prevP = next;
-
-
-
 
     if (pPressed) {
       currentBody = (currentBody + 1) % (int)tractorBodies.size();
@@ -426,18 +411,6 @@ protected:
       currentBody = (currentBody - 1 + (int)tractorBodies.size()) %
                     (int)tractorBodies.size();
     }
-
-    /*
-    static bool prevK = false;
-    bool kPressed = horn && !prevK;
-    prevK = horn;
-
-    if (kPressed) {
-      hornAudio.play();
-      hornAudio.stop(false);
-    }
-
-    */
 
     static bool prevK = false;
     bool kPressed = horn && !prevK;
@@ -476,7 +449,6 @@ protected:
       hornAudio.stop(false);
     }
 #endif
-
 
     if (currentBody != lastBody) {
       if (lastBody == 0)
@@ -541,7 +513,7 @@ protected:
       }
     }
 
-    // Attacca strozapaglia (plow) quando vicino e premi "fire"
+    // Attaccamento dell'aratro
     static bool prevFire = false;
     bool firePressed = fire && !prevFire;
     prevFire = fire;
@@ -558,20 +530,12 @@ protected:
       }
     }
 
-    // =========================
-    //   CAMERA ORBITALE (Frecce + Right Stick PS)
-    //   - ←/→: ruota attorno al trattore (azimuth)
-    //   - ↑/↓: alza/abbassa l'elevazione
-    //   - R/F : zoom in / zoom out
-    //   - Right Stick (PS): stessa logica delle frecce (r.x -> elevazione, r.y -> azimuth)
-    //   Nota: nessuno smoothing, nessun roll
-    // =========================
-    static float camDist = 13.0f;                          // distanza iniziale un po' maggiore
-    static float camEl   = glm::radians(25.0f);            // elevazione rispetto all'orizzontale
+    static float camDist = 13.0f; // distanza iniziale un po' maggiore
+    static float camEl   = glm::radians(25.0f); // elevazione rispetto all'orizzontale
     static float camAz   = glm::pi<float>();
 
-    const float ORBIT_SPEED = glm::radians(90.0f);         // deg/s
-    const float ZOOM_SPEED  = 18.0f;                       // unità/s
+    const float ORBIT_SPEED = glm::radians(90.0f); // deg/s
+    const float ZOOM_SPEED  = 18.0f; // unità/s
     const float MIN_DIST    = 8.0f;
     const float MAX_DIST    = 35.0f;
 
@@ -579,7 +543,6 @@ protected:
     camAz -= 0.5*(r.y * ORBIT_SPEED * deltaT);
     camEl  = glm::clamp(camEl + 0.5f*(r.x * ORBIT_SPEED * deltaT), glm::radians(5.0f), glm::radians(80.0f));
 
-    // Punto che vogliamo guardare (leggermente sopra il corpo)
     glm::vec3 CamTarget = Pos + glm::vec3(0, 2, 0);
 
     // Offset camera in sistema locale del trattore (sferico: distanza + elevazione + azimuth)
