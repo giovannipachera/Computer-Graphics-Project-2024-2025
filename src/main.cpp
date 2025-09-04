@@ -545,14 +545,13 @@ protected:
 
     glm::vec3 CamTarget = Pos + glm::vec3(0, 2, 0);
 
-    // Offset camera in sistema locale del trattore (sferico: distanza + elevazione + azimuth)
     glm::mat4 yawRot   = glm::rotate(glm::mat4(1.0f), Yaw + camAz, glm::vec3(0, 1, 0));
     glm::mat4 pitchRot = glm::rotate(glm::mat4(1.0f), -camEl,       glm::vec3(1, 0, 0));
     glm::vec3 camOff   = glm::vec3(yawRot * pitchRot * glm::vec4(0, 0, camDist, 1));
 
     glm::vec3 CamPos = CamTarget + camOff;
 
-    // View-Projection senza roll e senza smoothing
+    // View-Projection
     glm::mat4 ViewPrj = MakeViewProjectionLookAt(
         CamPos,                // posizione camera
         CamTarget,             // punto guardato
@@ -565,9 +564,7 @@ protected:
 
     // Global UBO
     GlobalUniformBufferObject gubo{};
-    // DOPO: sole dall’alto, leggermente verso la camera
     gubo.lightDir = glm::normalize(glm::vec3(-1.0f, -1.0f, 0.0f));
-
     gubo.lightColor = glm::vec4(1.0f);
     gubo.eyePos = CamPos;
     gubo.eyeDir = glm::vec4(0, 0, 0, 1);
@@ -580,17 +577,14 @@ protected:
              baseTr;
     };
 
-    // --- Corpo: mostra SOLO l'istanza selezionata; le altre le portiamo sottoterra ---
     for (int k = 0; k < (int)tractorBodies.size(); ++k) {
       const std::string &name = tractorBodies[k];
       int i = SC.InstanceIds[name];
 
       glm::mat4 baseTr = baseFor(name);
       if (k == currentBody) {
-        // corpo visibile: segue Pos/Yaw come prima
         ubo.mMat = MakeWorld(Pos, Yaw, 0.0f, 0.0f) * baseTr;
       } else {
-        // corpo nascosto: lo trasliamo molto sotto
         ubo.mMat = HideMat(baseTr);
       }
 
@@ -601,7 +595,6 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // Assi: solo movimento globale + offset locale. NIENTE SteeringAng.
     for (const std::string &name : tractorAxes) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -619,11 +612,10 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // --- Allineamento tasselli (fase iniziale ruote)
-    static float PhaseFrontRight = 0.0f;               // riferimento
-    static float PhaseFrontLeft = glm::radians(20.0f); // tweak
-    static float PhaseRearRight = 0.0f;                // riferimento
-    static float PhaseRearLeft = glm::radians(20.0f);  // tweak
+    static float PhaseFrontRight = 0.0f;
+    static float PhaseFrontLeft = glm::radians(20.0f);
+    static float PhaseRearRight = 0.0f;
+    static float PhaseRearLeft = glm::radians(20.0f);
 
     // Ruote
     for (const std::string &name : tractorWheels) {
@@ -670,7 +662,7 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // Parafanghi: sterzano attorno al centro RUOTA (nessun roll)
+    // Parafanghi
     for (const std::string &name : tractorFenders) {
       int iF = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -683,9 +675,9 @@ protected:
         int iW = SC.InstanceIds[wheelName];
 
         glm::mat4 bodyTr = MakeWorld(Pos, Yaw, 0.0f, 0.0f);
-        glm::vec3 wheelP = *deltaP[iW]; // pivot = posizione ruota dal JSON
+        glm::vec3 wheelP = *deltaP[iW];
         glm::vec3 fendOff =
-            *deltaP[iF] - wheelP; // offset parafango rispetto alla ruota
+            *deltaP[iF] - wheelP;
 
         glm::mat4 toWheel = glm::translate(glm::mat4(1.0f), wheelP);
         glm::mat4 steerTr =
@@ -703,7 +695,7 @@ protected:
       SC.DS[iF]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // Aratro (plow) e scena
+    // Aratro
     for (const std::string &name : tractorPlow) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -723,6 +715,7 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
+    // Scena
     for (const std::string &name : tractorScene) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
@@ -733,66 +726,62 @@ protected:
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // --- PALE EOLICHE: rotazione pulita attorno al mozzo, senza wobble ---
-static float bladeRot = 20.0f;
-bladeRot -= deltaT * glm::radians(60.0f);
+    // Pale eoliche
+    static float bladeRot = 20.0f;
+    bladeRot -= deltaT * glm::radians(60.0f);
 
-for (const auto &b : blades) {
-    int i = SC.InstanceIds[b.id];
+    for (const auto &b : blades) {
+        int i = SC.InstanceIds[b.id];
 
-    // 1) Pose di base dall'istanza (pos + orientazione corretta dal JSON)
-    glm::mat4 M0 = SC.I[i].Wm * baseFor(b.id);
+        // Posa di base dal json
+        glm::mat4 M0 = SC.I[i].Wm * baseFor(b.id);
 
-    // 2) Elimina scala/shear dall'istanza (causa classica del "ballo")
-    glm::vec3 T = glm::vec3(M0[3]);
-    glm::vec3 Xw = glm::vec3(M0[0]), Yw = glm::vec3(M0[1]), Zw = glm::vec3(M0[2]);
-    if (glm::length(Xw) > 0) Xw = glm::normalize(Xw);
-    if (glm::length(Yw) > 0) Yw = glm::normalize(Yw);
-    if (glm::length(Zw) > 0) Zw = glm::normalize(Zw);
-    glm::mat4 R0(1.0f);
-    R0[0] = glm::vec4(Xw, 0);
-    R0[1] = glm::vec4(Yw, 0);
-    R0[2] = glm::vec4(Zw, 0);
-    glm::mat4 M_noScale = glm::translate(glm::mat4(1.0f), T) * R0;
+        glm::vec3 T = glm::vec3(M0[3]);
+        glm::vec3 Xw = glm::vec3(M0[0]), Yw = glm::vec3(M0[1]), Zw = glm::vec3(M0[2]);
+        if (glm::length(Xw) > 0) Xw = glm::normalize(Xw);
+        if (glm::length(Yw) > 0) Yw = glm::normalize(Yw);
+        if (glm::length(Zw) > 0) Zw = glm::normalize(Zw);
+        glm::mat4 R0(1.0f);
+        R0[0] = glm::vec4(Xw, 0);
+        R0[1] = glm::vec4(Yw, 0);
+        R0[2] = glm::vec4(Zw, 0);
+        glm::mat4 M_noScale = glm::translate(glm::mat4(1.0f), T) * R0;
 
-    // 3) Asse LOCALE di rotazione: scegliamo quello più orizzontale
-    glm::vec3 axes[3] = { {1,0,0}, {0,1,0}, {0,0,1} };
-    glm::vec3 axesW[3] = {
-        glm::vec3(R0 * glm::vec4(axes[0], 0)),
-        glm::vec3(R0 * glm::vec4(axes[1], 0)),
-        glm::vec3(R0 * glm::vec4(axes[2], 0))
-    };
-    int best = 0; float sc = fabs(axesW[0].y);
-    for (int k = 1; k < 3; ++k) { float s = fabs(axesW[k].y); if (s < sc) { sc = s; best = k; } }
-    glm::vec3 axisLocal = axes[best];  // se gira al contrario, usa -bladeRot
+        // Asse locale di rotazione
+        glm::vec3 axes[3] = { {1,0,0}, {0,1,0}, {0,0,1} };
+        glm::vec3 axesW[3] = {
+            glm::vec3(R0 * glm::vec4(axes[0], 0)),
+            glm::vec3(R0 * glm::vec4(axes[1], 0)),
+            glm::vec3(R0 * glm::vec4(axes[2], 0))
+        };
+        int best = 0; float sc = fabs(axesW[0].y);
+        for (int k = 1; k < 3; ++k) { float s = fabs(axesW[k].y); if (s < sc) { sc = s; best = k; } }
+        glm::vec3 axisLocal = axes[best];
 
-    // 4) Micro-offset del mozzo (se l'origin non è centrato al micron)
-    glm::vec3 hubLocal = glm::vec3(0.0f); // es. {0.0f, -0.02f, 0.0f} se serve
-    glm::mat4 toHub   = glm::translate(glm::mat4(1.0f),  hubLocal);
-    glm::mat4 fromHub = glm::translate(glm::mat4(1.0f), -hubLocal);
+        // Piccolo offset del mozzo
+        glm::vec3 hubLocal = glm::vec3(0.0f);
+        glm::mat4 toHub   = glm::translate(glm::mat4(1.0f),  hubLocal);
+        glm::mat4 fromHub = glm::translate(glm::mat4(1.0f), -hubLocal);
 
-    // 5) Rotazione locale attorno al mozzo
-    glm::mat4 Rspin = glm::rotate(glm::mat4(1.0f), bladeRot, axisLocal);
+        // Rotazione locale intorno al mozzo
+        glm::mat4 Rspin = glm::rotate(glm::mat4(1.0f), bladeRot, axisLocal);
 
-    ubo.mMat  = M_noScale * toHub * Rspin * fromHub;
-    ubo.mvpMat = ViewPrj * ubo.mMat;
-    ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
+        ubo.mMat  = M_noScale * toHub * Rspin * fromHub;
+        ubo.mvpMat = ViewPrj * ubo.mMat;
+        ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
 
-    SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
-    SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
-}
+        SC.DS[i]->map(currentImage, &ubo, sizeof(ubo), 0);
+        SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
+    }
 
-
-    // --- MULINO (id "m"): tilt fisso + spin lento attorno a X ---
-    // velocità più lenta delle eoliche, stesso verso (usa -=)
+    // Mulino
     static float millRot = 0.0f;
-    millRot -= deltaT * glm::radians(15.0f); // regola i 15°/s a gusto
+    millRot -= deltaT * glm::radians(15.0f);
 
     for (const std::string &name : mill) {
       int i = SC.InstanceIds[name];
       glm::mat4 baseTr = baseFor(name);
 
-      // Matrice di partenza e base ortonormale (evita wobble)
       glm::mat4 M0 = SC.I[i].Wm * baseTr;
       glm::vec3 T  = glm::vec3(M0[3]);
       glm::vec3 Xw = glm::normalize(glm::vec3(M0[0]));
@@ -804,20 +793,16 @@ for (const auto &b : blades) {
       R0[2] = glm::vec4(Zw, 0.0f);
       glm::mat4 M_noScale = glm::translate(glm::mat4(1.0f), T) * R0;
 
-      // tuoi tilt fissati (tienili come li hai trovati buoni)
       const float tiltX_deg = -15.0f;
       const float tiltY_deg = -20.0f;
 
       glm::mat4 RtiltX = glm::rotate(glm::mat4(1.0f), glm::radians(tiltX_deg), glm::vec3(1,0,0));
       glm::mat4 RtiltY = glm::rotate(glm::mat4(1.0f), glm::radians(tiltY_deg), glm::vec3(0,0,1));
 
-      // SPIN attorno all’asse X locale (perché in Blender l’asse del mulino l’abbiamo allineato a +X)
       glm::mat4 RspinX = glm::rotate(glm::mat4(1.0f), millRot, glm::vec3(1,0,0));
-
-      // Ordine: prima tilt (posa iniziale), poi spin (verso coerente con eoliche)
       glm::mat4 Rtotal = RtiltX * RtiltY * RspinX;
 
-      ubo.mMat  = M_noScale * Rtotal;  // origin = centro mozzo → nessun toPivot/fromPivot
+      ubo.mMat  = M_noScale * Rtotal;  // centro mozzo
       ubo.mvpMat = ViewPrj * ubo.mMat;
       ubo.nMat   = glm::inverse(glm::transpose(ubo.mMat));
 
@@ -825,6 +810,7 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
+    // Cavalli
     for (const auto &h : horses) {
       int i = SC.InstanceIds[h.id];
       glm::mat4 baseHr = baseFor(h.id);
@@ -840,8 +826,7 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // ---------- CHICKENS ----------
-
+    // Galline
     for (const auto &c : chickens) {
       int i = SC.InstanceIds[c.id];
       glm::mat4 baseCh = baseFor(c.id);
@@ -857,8 +842,7 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // ---------- COWS ----------
-
+    // Mucche
     for (const auto &h : cows) {
       int i = SC.InstanceIds[h.id];
       glm::mat4 baseHr = baseFor(h.id);
@@ -874,17 +858,16 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // ---------- DOG ----------
+    // Cane
     for (const auto &d : dog) {
-      int i = SC.InstanceIds[d];        // ID dell'orso
-      glm::mat4 baseB = baseFor(d);     // base dal JSON
+      int i = SC.InstanceIds[d];
+      glm::mat4 baseB = baseFor(d);
 
-      // Trasformazioni di orientamento e scala (simile agli altri animali)
       glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
       glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
-      glm::mat4 rotY = glm::mat4(1.0f); // puoi regolare se vuoi un'orientazione iniziale diversa
-      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f)); // scala a piacere
-      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(-95.0f, 0.5f, 95.0f)); // posizione iniziale
+      glm::mat4 rotY = glm::mat4(1.0f);
+      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
+      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(-95.0f, 0.5f, 95.0f));
 
       ubo.mMat = transB * rotY * rotZ * rotX * scaleB * baseB;
       ubo.mvpMat = ViewPrj * ubo.mMat;
@@ -894,17 +877,16 @@ for (const auto &b : blades) {
       SC.DS[i]->map(currentImage, &gubo, sizeof(gubo), 2);
     }
 
-    // ---------- BEAR ----------
+    // Orso
     for (const auto &b : bear) {
-      int i = SC.InstanceIds[b];        // ID dell'orso
-      glm::mat4 baseB = baseFor(b);     // base dal JSON
+      int i = SC.InstanceIds[b];
+      glm::mat4 baseB = baseFor(b);
 
-      // Trasformazioni di orientamento e scala (simile agli altri animali)
       glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0,0,1));
       glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(1,0,0));
-      glm::mat4 rotY = glm::mat4(1.0f); // puoi regolare se vuoi un'orientazione iniziale diversa
-      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f)); // scala a piacere
-      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(205.0f, 0.5f, -95.0f)); // posizione iniziale
+      glm::mat4 rotY = glm::mat4(1.0f);
+      glm::mat4 scaleB = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
+      glm::mat4 transB = glm::translate(glm::mat4(1.0f), glm::vec3(205.0f, 0.5f, -95.0f));
 
       ubo.mMat = transB * rotY * rotZ * rotX * scaleB * baseB;
       ubo.mvpMat = ViewPrj * ubo.mMat;
@@ -915,7 +897,7 @@ for (const auto &b : blades) {
     }
 
 
-    // ---------- DUCKS: movimento sull'acqua ----------
+    // Papere
     static float duckTime = 0.0f;
     duckTime += deltaT;
 
@@ -928,13 +910,10 @@ for (const auto &b : blades) {
       int i = SC.InstanceIds[ducks[idx].id];
       glm::mat4 baseD = baseFor(ducks[idx].id);
 
-      // centro di partenza
       glm::vec3 center = ducks[idx].position;
 
-      // fase individuale (qui uso id per diversificare un po’)
       float phase = static_cast<float>(idx) * 0.7f;
 
-      // calcola spostamento ellittico e bobbing
       float t = duckTime + phase;
       float dx = swimRadiusX * sin(t * 0.8f);
       float dz = swimRadiusZ * cos(t * 0.72f);
@@ -942,7 +921,6 @@ for (const auto &b : blades) {
 
       glm::vec3 pos = center + glm::vec3(dx, dy, dz);
 
-      // direzione di movimento per rotazione
       float heading = glm::degrees(atan2(-0.8f * swimRadiusX * cos(t * 0.8f),
                                          -0.72f * swimRadiusZ * sin(t * 0.72f)));
 
